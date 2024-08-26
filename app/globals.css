@@ -9,10 +9,15 @@ body {
   height: 100dvh;
 }
 
-@layer base {
-  h1 {
-    font-size: unset;
-    font-weight: unset;
-    @apply font-bold text-2xl;
-  }
+input {
+  @apply px-2 rounded-lg  border-b-2 transition-all;
+}
+
+label {
+  @apply text-sm;
+}
+
+input:focus {
+  outline: none;
+  border-bottom-color: rgba(0, 0, 255, 0.596);
 }

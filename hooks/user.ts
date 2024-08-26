@@ -1,31 +1,33 @@
 import { useEffect, useState } from "react";
-import { getUser } from "../utils/user/userAPI";
-import { UserProps } from "@/types";
+import { addUser, loginUser } from "../utils/user/userAPI";
+import { LoginFormProps, RegisterFormProps, UserProps } from "@/types";
 
-export const useGetUser = (id: number | null) => {
-  const [user, setUser] = useState<UserProps | undefined>(undefined);
+export const useAddUser = () => {
   const [loading, setloading] = useState(true);
   const [error, seterror] = useState<String | null>(null);
-
-  useEffect(() => {
-    if (!id || typeof id !== "number") {
-      console.log(id);
-      console.log(typeof id);
-      return;
-    }
+  const handleAddUser = async (data: RegisterFormProps) => {
     try {
-      console.log(id);
-      console.log(typeof id);
-      const fetchUser = async () => {
-        const fetchedUser = await getUser(id);
-        setUser(fetchedUser);
-      };
-      fetchUser();
+      await addUser(data);
     } catch (error) {
-      seterror(error instanceof Error ? error.message : "Failed to fetch user");
+      console.log(error);
     } finally {
       setloading(false);
     }
-  }, [id]);
-  return { user, loading, error };
+  };
+  return { handleAddUser, loading, error };
+};
+
+export const useLoginUser = () => {
+  const [loading, setloading] = useState(true);
+  const [error, seterror] = useState<String | null>(null);
+  const handleLoginUser = async (data: LoginFormProps) => {
+    try {
+      await loginUser(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setloading(false);
+    }
+  };
+  return { handleLoginUser, loading, error };
 };

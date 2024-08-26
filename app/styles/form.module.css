@@ -1,0 +1,12 @@
+.inputContainer {
+  @apply flex justify-between gap-5 items-center;
+}
+
+.error {
+  @apply mt-2  flex justify-center text-red-600 text-[12px] w-[195px] font-semibold text-center;
+}
+
+.error_bottom_border {
+  border-bottom-color: red;
+  transition: all ease-in-out 250ms;
+}

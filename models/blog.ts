@@ -1,11 +1,11 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model,ForeignKey } from "sequelize";
 import { sequelize } from "../utils/database";
-class Product extends Model {
-  public name!: string;
-  public price!: number;
+class Blog extends Model {
+  public title!: string;
+  public body!: number;
 }
 
-const schemaName = "Product";
+const schemaName = "Blog";
 
 const createSchemaIfNotExists = async (schema: string) => {
   try {
@@ -16,16 +16,19 @@ const createSchemaIfNotExists = async (schema: string) => {
   }
 };
 
-const initializeProductModel = async () => {
+const initializeBlogModel = async () => {
   await createSchemaIfNotExists(schemaName);
 
-  Product.init(
+  Blog.init(
     {
-      name: {
+      userId: {
+        type: ForeignKey("user"),
+      },
+      title: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      price: {
+      body: {
         type: DataTypes.FLOAT,
         allowNull: false,
       },
@@ -39,14 +42,14 @@ const initializeProductModel = async () => {
 
   try {
     await sequelize.sync({ alter: true });
-    console.log("Database synced... from Product");
+    console.log("Database synced... from Blog");
   } catch (err) {
-    console.error("Error syncing the database from Product:", err);
+    console.error("Error syncing the database from Blog:", err);
   }
 
-  return Product;
+  return Blog;
 };
 
 export const getProductModel = async () => {
-  return await initializeProductModel();
+  return await initializeBlogModel();
 };

@@ -1,21 +1,48 @@
-import * as Yup from "Yup";
+import { object, string, ZodError, ZodIssueCode } from "zod";
+import jwt from "jsonwebtoken";
 
-export const transformYupErrorsIntoObject = (errors: Yup.ValidationError) => {
-  const validationErrors: Record<string, string> = {};
+export const validateWithSchema = <T>(error: any) => {
+  if (error instanceof ZodError) {
+    const errors = error.errors.reduce((acc: Record<string, string>, curr) => {
+      acc[curr.path.join(".")] = curr.message;
+      return acc;
+    }, {});
+    return errors; // Return the errors object
+  }
 
-  errors.inner.forEach((error) => {
-    if (error.path !== undefined) {
-      validationErrors[error.path] = error.errors[0];
-    }
-  });
-
-  return validationErrors;
+  return null; // Return null if the error is not a ZodError
 };
 
+export const registerSchema = () => {
+  return object({
+    email: string({ required_error: "Email is required" }).email(),
+    username: string({ required_error: "Username is required" }).min(
+      3,
+      "Minimum length of username is 3 characters"
+    ),
+    password: string({ required_error: "Password is required" })
+      .min(8, "minimum length of password is 8 characters")
+      .max(30, "maximum length of password is 30 characters"),
+    confirmPassword: string({
+      required_error: "Confirm Password is required",
+    }),
+  }).superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        // he code property is required, and in this case, we're using the ZodIssueCode.custom to indicate that this is a custom validation issue.
+        code: ZodIssueCode.custom, // Adding the 'code' property
+        path: ["confirmPassword"], // The error will be on the confirmPassword field
+        message: "Passwords must match",
+      });
+    }
+  });
+};
 
-export const getNewUserSchema = () => {
-  return Yup.object().shape({
-    name: Yup.string().required("Name is required"),
-    email: Yup.string().email().required("Email is required"),
+export const loginSchema = () => {
+  return object({
+    emailOrUsername: string({
+      required_error: "Email or Username is required",
+    }),
+    password: string({ required_error: "Password is required" }),
   });
 };

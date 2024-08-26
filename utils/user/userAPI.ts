@@ -1,15 +1,31 @@
-import { UserProps } from "@/types";
+import { LoginFormProps, RegisterFormProps } from "@/types";
 
-export const getUser = async (id: number): Promise<UserProps | undefined> => {
+export const loginUser = async (data: LoginFormProps) => {
   try {
-    const response = await fetch(`/api/users/${id}`, {
-      method: "GET",
+    const response = await fetch(`/api/users/login`, {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify(data),
     });
     return await response.json();
   } catch (error) {
     console.error("Error fetching user:", error);
+  }
+};
+
+export const addUser = async (data: RegisterFormProps) => {
+  try {
+    const response = await fetch("/api/users/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error adding user:", error);
   }
 };

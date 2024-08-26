@@ -1,5 +1,4 @@
 import React, { ReactNode } from "react";
-import Nav from "../components/general/Nav";
 
 const AdminLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   return (
