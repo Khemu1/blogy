@@ -15,7 +15,7 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   });
-  const { handleAddUser } = useAddUser();
+  const { handleAddUser, error: ApiError } = useAddUser();
   const [errors, setErrors] = useState<null | Record<string, string>>(null);
   const handleSubmit = async (data: RegisterFormProps, e: React.FormEvent) => {
     try {
@@ -27,7 +27,7 @@ const Register = () => {
     } catch (error) {
       if (error instanceof ZodError) {
         setErrors(validateWithSchema(error));
-        throw errors;
+        throw validateWithSchema(error);
       } else {
         console.error("An error occurred during validation:", error);
         setErrors({ message: "An error occurred during validation" });
@@ -47,7 +47,11 @@ const Register = () => {
             <label>Email :</label>
             <input
               id="email"
-              className={errors?.email ? styles.error_bottom_border : ""}
+              className={
+                errors?.email || ApiError?.email
+                  ? styles.error_bottom_border
+                  : ""
+              }
               type="Email"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -68,7 +72,11 @@ const Register = () => {
             <label>Username :</label>
             <input
               id="username"
-              className={errors?.username ? styles.error_bottom_border : ""}
+              className={
+                errors?.username || ApiError?.username
+                  ? styles.error_bottom_border
+                  : ""
+              }
               type="text"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -76,12 +84,13 @@ const Register = () => {
                   username: e.target.value,
                 }));
               }}
-              minLength={1}
             />
           </div>
-          {errors?.username && (
+          {(errors?.username || ApiError?.username) && (
             <div className="flex justify-end">
-              <small className={styles.error}>{errors.username}</small>
+              <small className={styles.error}>
+                {errors?.username ?? ApiError?.username}
+              </small>
             </div>
           )}
         </div>
@@ -90,7 +99,11 @@ const Register = () => {
             <label>Password :</label>
             <input
               id="password"
-              className={errors?.password ? styles.error_bottom_border : ""}
+              className={
+                errors?.password || ApiError?.password
+                  ? styles.error_bottom_border
+                  : ""
+              }
               type="password"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -98,12 +111,13 @@ const Register = () => {
                   password: e.target.value,
                 }));
               }}
-              minLength={5}
             />
           </div>
-          {errors?.password && (
+          {(errors?.password || ApiError?.password) && (
             <div className="flex justify-end">
-              <small className={styles.error}>{errors.password}</small>
+              <small className={styles.error}>
+                {errors?.password ?? ApiError?.password}
+              </small>
             </div>
           )}
         </div>
@@ -122,22 +136,26 @@ const Register = () => {
                   confirmPassword: e.target.value,
                 }));
               }}
-              minLength={5}
             />
           </div>
 
-          {errors?.confirmPassword && (
+          {(errors?.confirmPassword || ApiError?.confirmPassword) && (
             <div className="flex justify-end">
-              <small className={styles.error}>{errors.confirmPassword}</small>
+              <small className={styles.error}>
+                {errors?.confirmPassword ?? ApiError?.confirmPassword}
+              </small>
             </div>
           )}
         </div>
         <button
           type="submit"
-          className="h-max w-max m-auto bg-slate-300 px-3 py-1 rounded-xl transition-all hover:bg-white font-semibold"
+          className="h-max w-max m-auto text-xl bg-slate-300 px-5 py-1 rounded-lg transition-all hover:bg-white font-extrabold"
         >
           Register
         </button>
+        {ApiError?.message && (
+          <small className={styles.login_error}>{ApiError.message}</small>
+        )}
       </form>
     </div>
   );

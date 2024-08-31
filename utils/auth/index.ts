@@ -1,43 +1,94 @@
-import jwt from "jsonwebtoken";
+import { JWTPayloadProps } from "@/types";
+import { jwtVerify, SignJWT } from "jose"; // will be using jose for validation since runtime edge doesn't support all modules in jsonwebtoken
 
-export const cookieOptions = {
-  maxAge: 7 * 24 * 60 * 60, // 7 days
+export const refreshCookieOptions = {
+  maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
   httpOnly: true,
   path: "/",
   sameSite: "strict" as const,
 };
 
-export const generateAccessToken = (payload: object) => {
-  const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-    expiresIn: "1h",
-  });
-  return token;
+export const accessCookieOptions = {
+  maxAge: 3600, // 1h in seconds
+  httpOnly: true,
+  path: "/",
+  sameSite: "strict" as const,
 };
 
-export const generateRefreshToken = (payload: object) => {
-  const token = jwt.sign(payload, process.env.JWT_REFRESH as string, {
-    expiresIn: "7d",
-  });
-  return token;
-};
-
-export const verifyToken = (token: string) => {
+export const generateAccessToken = async (payload: JWTPayloadProps) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    return decoded as object;
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const token = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+      .setExpirationTime("1h")
+      .setIssuedAt()
+      .sign(secret);
+
+    console.log("Generated Token:", token);
+    return token;
   } catch (error) {
+    console.error("Error generating access token:", error);
+    throw new Error("Failed to generate access token");
+  }
+};
+
+export const generateRefreshToken = async (payload: JWTPayloadProps) => {
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_REFRESH as string);
+    const token = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256", typ: "JWT" }) // Set the protected header
+      .setExpirationTime("7d")
+      .setIssuedAt()
+      .sign(secret);
+    return token;
+  } catch (error) {
+    throw new Error("Failed to generate refresh token");
+  }
+};
+
+export const verifyToken = async (token: string, access: boolean) => {
+  try {
+    const secret = new TextEncoder().encode(
+      access
+        ? (process.env.JWT_SECRET as string)
+        : (process.env.JWT_REFRESH as string)
+    );
+    const { payload } = await jwtVerify(token, secret, {
+      algorithms: ["HS256"],
+    });
+    return payload;
+  } catch (error) {
+    console.log("Token verification failed", error);
     return null;
   }
 };
 
 export async function createTokens(id: number) {
   try {
-    const accessToken = generateAccessToken({ id });
-    const refreshToken = generateRefreshToken({ id });
+    const accessToken = await generateAccessToken({ id });
+    const refreshToken = await generateRefreshToken({ id });
 
     return { accessToken, refreshToken };
   } catch (error) {
     console.error("Error creating tokens:", error);
     throw new Error("Token creation failed");
   }
+}
+
+export function checkPaylod(
+  accessPayload: JWTPayloadProps,
+  refreshPayload: JWTPayloadProps
+): boolean | number {
+  if (
+    !accessPayload ||
+    !refreshPayload ||
+    typeof Number(accessPayload?.id) !== "number" ||
+    typeof Number(refreshPayload?.id) !== "number"
+  ) {
+    return false;
+  }
+  if (!accessPayload.id !== !refreshPayload.id) {
+    return false;
+  }
+  return accessPayload.id;
 }

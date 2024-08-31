@@ -1,23 +1,23 @@
 import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../utils/database";
 import initializeUserModel from "./user";
+import initializeBlogModel from "./blog";
 
-export class Blog extends Model {
+export class Comment extends Model {
   public id!: number;
   public userId!: number;
-  public title!: string;
+  public blogId!: number;
   public content!: string;
 }
 
-const schemaName = "Blog";
+const schemaName = "Comment";
 
-const initializeBlogModel = async () => {
+const initializeCommentModel = async () => {
+
+  const User = await initializeUserModel(); // Import here but only use for relationships
+  const Blog = await initializeBlogModel(); // Import here but only use for relationships
   try {
-    // Initialize User model for relationships
-    const User = await initializeUserModel();
-
-    // Define the Blog model
-    Blog.init(
+    Comment.init(
       {
         id: {
           type: DataTypes.INTEGER,
@@ -28,14 +28,14 @@ const initializeBlogModel = async () => {
           type: DataTypes.INTEGER,
           allowNull: false,
         },
+        blogId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+        },
         author: {
           type: DataTypes.STRING,
           allowNull: true,
-          defaultValue: "Unknown", // Corrected typo from "Unkown"
-        },
-        title: {
-          type: DataTypes.STRING,
-          allowNull: false,
+          defaultValue: "Unknown",
         },
         content: {
           type: DataTypes.TEXT,
@@ -53,11 +53,14 @@ const initializeBlogModel = async () => {
       {
         sequelize,
         schema: schemaName,
-        tableName: "Blogs",
         timestamps: true,
+        tableName: "Comments",
         indexes: [
           {
             fields: ["userId"],
+          },
+          {
+            fields: ["blogId"],
           },
           {
             fields: ["createdAt"],
@@ -66,19 +69,19 @@ const initializeBlogModel = async () => {
       }
     );
 
-    // Define the relationship
-    Blog.belongsTo(User, {
+    Comment.belongsTo(User, {
       foreignKey: "userId",
-      targetKey: "id",
     });
 
-    // Synchronize the model with the database
+    Comment.belongsTo(Blog, {
+      foreignKey: "blogId",
+    });
     await sequelize.sync(); // Use { force: true } if you want to drop tables and recreate them
   } catch (error) {
-    console.error("Failed to initialize Blog model:", error);
+    console.error("Failed to initialize Comment model:");
   }
 
-  return Blog;
+  return Comment;
 };
 
-export default initializeBlogModel;
+export default initializeCommentModel;

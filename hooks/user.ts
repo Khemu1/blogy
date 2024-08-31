@@ -1,15 +1,25 @@
 import { useEffect, useState } from "react";
 import { addUser, loginUser } from "../utils/user/userAPI";
-import { LoginFormProps, RegisterFormProps, UserProps } from "@/types";
+import {
+  LoginFormProps,
+  RegisterFormProps,
+  LoginErrorProps,
+  RegisterErrorProps,
+} from "@/types";
+import { isLoginError, isRegisterError } from "@/utils/user";
 
 export const useAddUser = () => {
   const [loading, setloading] = useState(true);
-  const [error, seterror] = useState<String | null>(null);
+  const [error, seterror] = useState<RegisterErrorProps | null>(null);
   const handleAddUser = async (data: RegisterFormProps) => {
     try {
       await addUser(data);
     } catch (error) {
-      console.log(error);
+      if (isRegisterError(error)) {
+        seterror(error);
+      } else {
+        seterror({ message: "Registration failed" });
+      }
     } finally {
       setloading(false);
     }
@@ -19,12 +29,16 @@ export const useAddUser = () => {
 
 export const useLoginUser = () => {
   const [loading, setloading] = useState(true);
-  const [error, seterror] = useState<String | null>(null);
+  const [error, setError] = useState<LoginErrorProps | null>(null);
   const handleLoginUser = async (data: LoginFormProps) => {
     try {
       await loginUser(data);
     } catch (error) {
-      console.log(error);
+      if (isLoginError(error)) {
+        setError(error);
+      } else {
+        setError({ message: "Login failed" });
+      }
     } finally {
       setloading(false);
     }

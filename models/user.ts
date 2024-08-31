@@ -1,60 +1,65 @@
-import { DataTypes, Model, ModelStatic } from "sequelize";
+import { DataTypes, Model } from "sequelize";
 import { sequelize } from "../utils/database";
 
-const schemaName = "User";
-
-const createSchemaIfNotExists = async (schema: string) => {
-  try {
-    await sequelize.query(`CREATE SCHEMA IF NOT EXISTS "${schema}"`);
-    console.log(`Schema ${schema} ensured.`);
-  } catch (error) {
-    console.error(`Failed to create or check schema ${schema}:`, error);
-  }
-};
-
-class User extends Model {
+export class User extends Model {
+  public id!: number;
   public name!: string;
   public username!: string;
   public password!: string;
 }
 
+const schemaName = "User";
+
 const initializeUserModel = async () => {
-  await createSchemaIfNotExists(schemaName);
-
-  User.init(
-    {
-      username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-    },
-    {
-      sequelize,
-      schema: schemaName,
-      timestamps: false,
-    }
-  );
-
   try {
-    await sequelize.sync({ alter: true });
-    console.log("Database synced... from user");
+    User.init(
+      {
+        id: {
+          type: DataTypes.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        username: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        password: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        createdAt: {
+          type: DataTypes.DATE,
+          defaultValue: DataTypes.NOW,
+        },
+        updatedAt: {
+          type: DataTypes.DATE,
+          defaultValue: DataTypes.NOW,
+        },
+      },
+      {
+        sequelize,
+        schema: schemaName,
+        timestamps: true,
+        tableName: "Users",
+        indexes: [
+          {
+            fields: ["createdAt"],
+          },
+        ],
+      }
+    );
+    await sequelize.sync(); // Use { force: true } if you want to drop tables and recreate them
   } catch (error) {
-    console.error("Failed to sync the database from User:", error);
+    console.error("Failed to initialize User model:", error);
   }
 
-  return User as ModelStatic<User>;
+  return User;
 };
 
-export const getUserModel = async () => {
-  return await initializeUserModel();
-};
+export default initializeUserModel;

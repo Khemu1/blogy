@@ -1,5 +1,5 @@
+import { LoginErrorProps, RegisterErrorProps } from "@/types";
 import { object, string, ZodError, ZodIssueCode } from "zod";
-import jwt from "jsonwebtoken";
 
 export const validateWithSchema = <T>(error: any) => {
   if (error instanceof ZodError) {
@@ -42,7 +42,26 @@ export const loginSchema = () => {
   return object({
     emailOrUsername: string({
       required_error: "Email or Username is required",
+    }).refine((val: string) => val.trim().length > 0, {
+      message: "Email or Username is required",
     }),
-    password: string({ required_error: "Password is required" }),
+    password: string({ required_error: "Password is required" }).refine(
+      (val: string) => val.trim().length > 0,
+      {
+        message: "Password is required",
+      }
+    ),
   });
+  /**
+   * The refine method should validate that the field has content
+   * rather than being empty. The condition inside the refine should check for a non-empty string.
+   */
 };
+
+export function isLoginError(error: any): error is LoginErrorProps {
+  return error && Object.values(error).some((val) => typeof val === "string");
+}
+
+export function isRegisterError(error: any): error is RegisterErrorProps {
+  return error && Object.values(error).some((val) => typeof val === "string");
+}

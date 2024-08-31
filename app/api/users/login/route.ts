@@ -1,10 +1,14 @@
 // app/api/users/login/route.ts
 import { Op } from "sequelize";
 import { connectDB } from "@/utils/database";
-import { getUserModel } from "@/models/user";
+import initializeUserModel from "@/models/user";
 import { LoginFormProps, UserProps } from "@/types";
 import { NextResponse, NextRequest } from "next/server";
-import { createTokens, cookieOptions } from "@/utils/auth";
+import {
+  accessCookieOptions,
+  refreshCookieOptions,
+  createTokens,
+} from "@/utils/auth";
 import bcrypt from "bcrypt";
 
 export async function POST(req: NextRequest) {
@@ -16,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     await connectDB();
-    const User = await getUserModel();
+    const User = await initializeUserModel();
 
     const user = (await User.findOne({
       where: {
@@ -40,9 +44,11 @@ export async function POST(req: NextRequest) {
       { message: "Logged in successfully" },
       { status: 200 }
     );
-    response.headers.set("Authorization", `Bearer ${accessToken}`);
-    response.cookies.set("refreshToken", refreshToken, cookieOptions);
 
+    // response.headers.set("Authorization", `Bearer ${accessToken}`);
+
+    response.cookies.set("accessToken", accessToken, accessCookieOptions);
+    response.cookies.set("refreshToken", refreshToken, refreshCookieOptions);
     return response;
   } catch (error) {
     console.error("Error logging in:", error);

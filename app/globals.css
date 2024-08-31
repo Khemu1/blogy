@@ -8,16 +8,24 @@
 body {
   height: 100dvh;
 }
-
 input {
-  @apply px-2 rounded-lg  border-b-2 transition-all;
+  @apply px-2 py-1 rounded-lg  border-b-2 transition-all;
+}
+textarea {
+  @apply px-2 py-1 rounded-lg resize-none overflow-hidden h-auto border-b-2 w-full;
+  transition: border-bottom-color 250ms ease-in-out;
 }
 
 label {
-  @apply text-sm;
+  @apply font-semibold;
 }
 
-input:focus {
+.submit_container {
+  @apply flex justify-center items-center py-[2rem] px-5 rounded-lg h-[32px] hover:bg-white;
+}
+
+input:focus,
+textarea:focus {
   outline: none;
   border-bottom-color: rgba(0, 0, 255, 0.596);
 }

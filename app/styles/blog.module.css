@@ -1,0 +1,74 @@
+/* styles/blog.module.css */
+
+.markdownPreview {
+  line-height: 1.6;
+  font-size: 1.150rem; /* Default font size (1.125rem = 18px) */
+  box-sizing: border-box;
+}
+
+.markdownPreview h1 {
+  font-size: 2.5rem; /* 40px */
+  margin-bottom: 1em;
+}
+
+.markdownPreview h2 {
+  font-size: 2rem; /* 32px */
+  margin-bottom: 0.75em;
+}
+
+.markdownPreview h3 {
+  font-size: 1.75rem; /* 28px */
+  margin-bottom: 0.5em;
+}
+
+.markdownPreview h4 {
+  font-size: 1.5rem; /* 24px */
+  margin-bottom: 0.5em;
+}
+
+.markdownPreview h5 {
+  font-size: 1.25rem; /* 20px */
+  margin-bottom: 0.5em;
+}
+
+.markdownPreview h6 {
+  font-size: 1rem; /* 16px */
+  margin-bottom: 0.5em;
+}
+
+.markdownPreview p {
+  margin-bottom: 1em;
+  font-size: 1.2rem;
+}
+
+.markdownPreview ul,
+.markdownPreview ol {
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.markdownPreview li {
+  margin-bottom: 0.5em;
+}
+
+.markdownPreview blockquote {
+  border-left: 2px solid #ddd;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #666;
+}
+
+.markdownPreview code {
+  font-size: 0.875rem; /* 14px */
+  background: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+.markdownPreview pre {
+  font-size: 0.875rem; /* 14px */
+  background: #f4f4f4;
+  padding: 1em;
+  border-radius: 3px;
+  overflow-x: auto;
+}
