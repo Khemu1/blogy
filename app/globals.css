@@ -45,10 +45,21 @@ textarea:focus {
   @apply flex gap-5 items-center;
 }
 
-.first_page{
+.first_page {
   border-radius: 10px 0px 0px 10px;
 }
 
-.last_page{
+.last_page {
   border-radius: 0px 10px 10px 0px;
+}
+.feat {
+  @apply flex flex-col gap-2 flex-wrap  items-center cursor-pointer rounded-lg shadow-md px-3 py-6 w-[95dvw] md:w-[75dvw];
+  background-color: #20252e;
+  transition: all 250ms ease-in-out;
+}
+.feat:hover {
+  transform: scale(1.02);
+}
+.feat:active {
+  transform: scale(1.03);
 }

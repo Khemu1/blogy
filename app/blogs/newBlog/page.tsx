@@ -86,7 +86,7 @@ const NewBlog = () => {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setData((prev) => ({ ...prev, title: e.target.value }))
             }
-            className="border border-gray-300 p-3 rounded-md focus:outline-none focus:border-blue-500"
+            className="p-3 rounded-md focus:outline-none"
           />
         </div>
         {(errors?.title || APIerror?.title) && (
@@ -105,7 +105,7 @@ const NewBlog = () => {
               setData((prev) => ({ ...prev, content: e.target.value }))
             }
             ref={textareaRef}
-            className="border border-gray-300 p-3 rounded-md focus:outline-none focus:border-blue-500"
+            className="p-3 rounded-md focus:outline-none"
             rows={6}
           />
         </div>
