@@ -5,6 +5,7 @@ import initializeUserModel from "./user";
 export class Blog extends Model {
   public id!: number;
   public userId!: number;
+  public author!: string;
   public title!: string;
   public content!: string;
 }
@@ -74,6 +75,9 @@ const initializeBlogModel = async () => {
 
     // Synchronize the model with the database
     await sequelize.sync(); // Use { force: true } if you want to drop tables and recreate them
+
+    // Reset search path to default (optional)
+    await sequelize.query('SET search_path TO "$user", public');
   } catch (error) {
     console.error("Failed to initialize Blog model:", error);
   }

@@ -34,7 +34,6 @@ export async function loginMiddleware(req: NextRequest) {
     console.error(validationErrors);
     return NextResponse.json(
       {
-        message: "Validation failed",
         errors: validationErrors,
       },
       { status: 400 }

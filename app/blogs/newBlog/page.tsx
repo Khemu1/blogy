@@ -8,7 +8,7 @@ import styles from "../../styles/form.module.css";
 import Image from "next/image";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
-import markdownStyles from "../../styles/blog.module.css"; // Import the CSS module
+import markdownStyles from "../../styles/form.module.css"; // Import the CSS module
 
 const NewBlog = () => {
   const [data, setData] = useState<NewBlogProp>({
@@ -31,6 +31,7 @@ const NewBlog = () => {
     } catch (error) {
       if (error instanceof ZodError) {
         setErrors(validateWithSchema(error));
+        console.log(validateWithSchema(error));
       } else {
         console.error("An error occurred during validation:", error);
       }
@@ -67,9 +68,9 @@ const NewBlog = () => {
   }, [data.content]); // Adjust when content changes
 
   return (
-    <div className="flex flex-col  sm:flex-row justify-center gap-6 items-center w-full h-full p-4 ">
+    <div className="flex flex-col sm:flex-row justify-center gap-6 items-center w-full p-4 ">
       <form
-        className="flex flex-1 flex-col justify-center items-center gap-4 bg-slate-200 p-6  rounded-lg shadow-md  transition-all"
+        className="flex flex-1 flex-col justify-center items-center gap-4 bg-base-200 p-6 rounded-lg shadow-md  transition-all"
         onSubmit={(e: React.FormEvent) => handleSubmit(data, e)}
       >
         <div className="flex flex-col w-full h-max">
@@ -108,30 +109,32 @@ const NewBlog = () => {
             rows={6}
           />
         </div>
-        {(errors?.content || APIerror?.content) && (
+        {(errors?.content || APIerror?.content || APIerror?.message) && (
           <p className={styles.error}>{errors?.content ?? APIerror?.content}</p>
         )}
         <div
-          className={`submit_container ${
-            loading || success ? "bg-white" : "bg-slate-100"
+          className={`submit_comment_container mt-4 bg-base-300 ${
+            loading || success
+              ? "bg-[#eb512b]"
+              : "bg-base-200 hover:bg-[#eb512b] hover:text-white"
           }`}
         >
           {loading ? (
-            <div className="flex w-full h-full justify-center items-center">
-              <span className="loading loading-spinner"></span>
+            <div className="flex mt-5 w-full h-full justify-center items-center">
+              <span className="loading loading-dots loading-lg"></span>
             </div>
           ) : success ? (
             <Image
-              src={"/checkmark.svg"}
-              width={32}
-              height={32}
-              alt="Blog Created"
+              src={"/assets/icons/checkmark.svg"}
+              width={64}
+              height={64}
+              alt="Comment Created"
               priority={true}
             />
           ) : (
             <button
               type={success ? "button" : "submit"}
-              className="font-semibold w-full  rounded-lg transition text-2xl"
+              className="font-semibold w-full rounded-lg py-3 transition text-2xl"
             >
               Submit
             </button>
@@ -141,7 +144,7 @@ const NewBlog = () => {
 
       <div className="flex flex-1  flex-col gap-3 ">
         {/* Title Preview */}
-        <div className="w-full border rounded-md p-4 bg-white mt-4 shadow-md">
+        <div className="w-full border-black rounded-md p-4 bg-base-200 mt-4 shadow-md">
           <h2 className="text-xl font-bold mb-2">Title Preview</h2>
           <div
             className={`${markdownStyles.markdownPreview}`}
@@ -152,7 +155,7 @@ const NewBlog = () => {
         </div>
 
         {/* Content Preview */}
-        <div className="w-full  border rounded-md p-4 bg-white mt-4 shadow-md">
+        <div className="w-full  border-base-200 rounded-md p-4 bg-base-200  mt-4 shadow-md">
           <h2 className="text-xl font-bold mb-2">Content Preview</h2>
           <div
             className={`${markdownStyles.markdownPreview}`}

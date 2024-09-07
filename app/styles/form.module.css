@@ -12,3 +12,86 @@
   border-bottom-color: red;
   transition: all ease-in-out 250ms;
 }
+
+
+.markdownPreview {
+  line-height: 1.6;
+  font-size: 1.15rem;
+  box-sizing: border-box;
+  text-overflow: inherit;
+  overflow: inherit;
+  white-space: inherit;
+}
+
+.markdownPreview h1 {
+  font-size: inherit; /* 40px */
+  text-overflow: inherit;
+  overflow: inherit;
+  white-space: inherit;
+}
+
+.markdownPreview h2 {
+  font-size: 2rem; /* 32px */
+  margin-bottom: inherit;
+}
+
+.markdownPreview h3 {
+  font-size: 1.75rem; /* 28px */
+  margin-bottom: inherit;
+}
+
+.markdownPreview h4 {
+  font-size: 1.5rem; /* 24px */
+  margin-bottom: inherit;
+}
+
+.markdownPreview h5 {
+  font-size: 1.25rem; /* 20px */
+  margin-bottom: inherit;
+}
+
+.markdownPreview h6 {
+  font-size: 1rem; /* 16px */
+  margin-bottom: inherit;
+}
+
+.markdownPreview p {
+  /* display: inherit; */
+  margin-bottom: inherit;
+  font-size: inherit;
+  text-overflow: inherit;
+  overflow: inherit;
+  white-space: inherit;
+}
+
+.markdownPreview ul,
+.markdownPreview ol {
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.markdownPreview li {
+  margin-bottom: 0.5em;
+}
+
+.markdownPreview blockquote {
+  border-left: 2px solid #ddd;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #adadad;
+}
+
+.markdownPreview code {
+  font-size: 0.875rem; /* 14px */
+  background: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+.markdownPreview pre {
+  font-size: 0.875rem; /* 14px */
+  background: #f4f4f4;
+  padding: 1em;
+  border-radius: 3px;
+  overflow-x: auto;
+}

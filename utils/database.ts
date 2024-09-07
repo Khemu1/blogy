@@ -8,7 +8,7 @@ const sequelize = new Sequelize({
   username: "postgres",
   password: "9513572680",
   database: "Blogy",
-  logging: console.log,
+  logging: false,
   port: 5432,
   pool: {
     max: 5, // Maximum number of connection in pool

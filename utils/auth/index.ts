@@ -2,8 +2,9 @@ import { JWTPayloadProps } from "@/types";
 import { jwtVerify, SignJWT } from "jose"; // will be using jose for validation since runtime edge doesn't support all modules in jsonwebtoken
 
 export const refreshCookieOptions = {
-  maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+  maxAge: 604800, // 7 days in seconds
   httpOnly: true,
+  secure: false,
   path: "/",
   sameSite: "strict" as const,
 };
@@ -11,8 +12,15 @@ export const refreshCookieOptions = {
 export const accessCookieOptions = {
   maxAge: 3600, // 1h in seconds
   httpOnly: true,
+  secure: false,
   path: "/",
   sameSite: "strict" as const,
+};
+
+export const requestCookieOptions = {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax" as const,
 };
 
 export const generateAccessToken = async (payload: JWTPayloadProps) => {
@@ -24,7 +32,6 @@ export const generateAccessToken = async (payload: JWTPayloadProps) => {
       .setIssuedAt()
       .sign(secret);
 
-    console.log("Generated Token:", token);
     return token;
   } catch (error) {
     console.error("Error generating access token:", error);
@@ -58,7 +65,7 @@ export const verifyToken = async (token: string, access: boolean) => {
     });
     return payload;
   } catch (error) {
-    console.log("Token verification failed", error);
+    console.log(`${token ? "access token" : "refresh token"}`, error);
     return null;
   }
 };

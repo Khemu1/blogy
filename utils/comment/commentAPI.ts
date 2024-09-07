@@ -1,13 +1,13 @@
 import { NewCommentProps } from "@/types";
 
-export const addComment = async (comment: NewCommentProps, blogId: number) => {
+export const addComment = async (blogId: number, content: string) => {
   try {
-    const response = await fetch(`/api/comment`, {
+    const response = await fetch(`/api/comments/${blogId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ comment, blogId }),
+      body: JSON.stringify({ blogId, content }),
     });
     if (!response.ok) {
       let errorMessage = { message: "Unexpected Error" };
@@ -160,5 +160,3 @@ export const deleteUserComment = async (id: number) => {
     throw error;
   }
 };
-
-

@@ -24,9 +24,9 @@ export const getUserBlogs = async (id: number) => {
   }
 };
 
-export const getBlogs = async () => {
+export const getBlogs = async (url: string) => {
   try {
-    const response = await fetch("/api/blogs", {
+    const response = await fetch(`${url}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -55,6 +55,7 @@ export const getBlog = async (id: number) => {
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
     if (!response.ok) {
       let errorMessage = { message: "Unexpected Error" };
@@ -80,6 +81,7 @@ export const addBlog = async (
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include", // Ensure cookies are included in the request
       body: JSON.stringify(data),
     });
     if (!response.ok) {

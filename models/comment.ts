@@ -7,16 +7,20 @@ export class Comment extends Model {
   public id!: number;
   public userId!: number;
   public blogId!: number;
+  public author!: string;
   public content!: string;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
 const schemaName = "Comment";
 
 const initializeCommentModel = async () => {
-
-  const User = await initializeUserModel(); // Import here but only use for relationships
-  const Blog = await initializeBlogModel(); // Import here but only use for relationships
   try {
+    const User = await initializeUserModel(); // Import User model
+    const Blog = await initializeBlogModel(); // Import Blog model
+
+    // Define Comment model
     Comment.init(
       {
         id: {
@@ -27,10 +31,28 @@ const initializeCommentModel = async () => {
         userId: {
           type: DataTypes.INTEGER,
           allowNull: false,
+          references: {
+            model: {
+              tableName: "Users", // The name of the table without schema
+              schema: "User", // Specify the schema if the referenced table is in a schema
+            },
+            key: "id",
+          },
+          onDelete: "CASCADE",
+          onUpdate: "CASCADE",
         },
         blogId: {
           type: DataTypes.INTEGER,
           allowNull: false,
+          references: {
+            model: {
+              tableName: "Blogs", // The name of the table without schema
+              schema: "Blog", // Specify the schema if the referenced table is in a schema
+            },
+            key: "id",
+          },
+          onDelete: "CASCADE",
+          onUpdate: "CASCADE",
         },
         author: {
           type: DataTypes.STRING,
@@ -65,20 +87,30 @@ const initializeCommentModel = async () => {
           {
             fields: ["createdAt"],
           },
+          
         ],
       }
     );
 
+    // Define relationships
     Comment.belongsTo(User, {
       foreignKey: "userId",
+      targetKey: "id",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
 
     Comment.belongsTo(Blog, {
       foreignKey: "blogId",
+      targetKey: "id",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
+
+    // Synchronize the model with the database
     await sequelize.sync(); // Use { force: true } if you want to drop tables and recreate them
   } catch (error) {
-    console.error("Failed to initialize Comment model:");
+    console.error("Failed to initialize Comment model:", error);
   }
 
   return Comment;

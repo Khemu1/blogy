@@ -31,6 +31,9 @@ export interface BlogProps {
   userId: number;
   title: string;
   content: string;
+  author: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface LoginErrorProps {
@@ -60,11 +63,13 @@ export interface CommentProps {
   id: number;
   userId: number;
   blogId: number;
+  author: string;
   content: string;
 }
 
 export interface CommentErrorProps {
-  message: string;
+  message?: string;
+  content?: string;
 }
 
 export interface JWTPayloadProps {
@@ -78,5 +83,11 @@ export interface TOKENProps {
 
 export interface ReturnedBlogProps {
   blogData: BlogProps;
-  comments: CommentProps;
+  comments: CommentProps[];
 }
+
+export type SearchParams = {
+  q?: string | null;
+  searchBy?: string | null;
+  sortBy?: string | null;
+};

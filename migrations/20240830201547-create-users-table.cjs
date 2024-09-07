@@ -9,6 +9,7 @@ async function up(queryInterface, Sequelize) {
       "name" VARCHAR(255) UNIQUE NOT NULL
     );
   `);
+
   // Create the Users table within the specified schema
   await queryInterface.createTable("Users", {
     id: {
@@ -47,7 +48,10 @@ async function up(queryInterface, Sequelize) {
 async function down(queryInterface, Sequelize) {
   await queryInterface.sequelize.query('SET search_path TO "User"');
   // Drop the table from the specified schema using raw query
-  await queryInterface.sequelize.query('DROP TABLE IF EXISTS "User"."Users"');
+  await queryInterface.sequelize.query('DROP TABLE IF EXISTS "Users"');
+
+  // Reset search path to default (optional)
+  await queryInterface.sequelize.query('SET search_path TO "$user", public');
 }
 
 module.exports = { up, down };

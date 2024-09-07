@@ -1,16 +1,23 @@
+import { cookies } from "next/headers";
 import {
   generateAccessToken,
   verifyToken,
   accessCookieOptions,
+  requestCookieOptions,
 } from "@/utils/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function validateUser(req: NextRequest) {
   console.log("validateUser middleware");
+
   try {
+    // Initialize cookie store
+
+    const cookieStore = cookies();
+
     // Retrieve tokens from cookies
-    const accessToken = req.cookies.get("accessToken")?.value;
-    const refreshToken = req.cookies.get("refreshToken")?.value;
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const refreshToken = cookieStore.get("refreshToken")?.value;
 
     if (!accessToken && !refreshToken) {
       // No tokens provided, return response immediately
@@ -49,10 +56,9 @@ export async function validateUser(req: NextRequest) {
       });
 
       // Create the response with the new access token
-
       const response = NextResponse.next();
       response.cookies.set("accessToken", newAccessToken, accessCookieOptions);
-      response.headers.set("x-User-Id", refreshTokenData.id as string);
+      response.headers.set("X-User-Id", refreshTokenData.id as string);
       return response;
     }
 

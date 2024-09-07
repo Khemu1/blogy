@@ -17,7 +17,7 @@ export const getCommentSchema = () => {
   return object({
     content: string({ required_error: "Comment content is required" }).min(
       3,
-      "Minimum length of comment content is 3 characters"
+      "Minimum length of comment's content is 3 characters"
     ),
   });
 };

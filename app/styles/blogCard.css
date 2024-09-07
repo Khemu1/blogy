@@ -1,0 +1,61 @@
+/* styles/blog.module.css */
+.blog_card {
+  @apply relative overflow-hidden flex justify-between items-center flex-col w-full md:w-[500px] md:h-[240px] border rounded-2xl py-4 px-4;
+  transition: all 250ms ease-in-out;
+}
+.blog_card:hover {
+}
+.blog_card .title {
+  @apply border-b pb-4 sm:text-4xl text-xl;
+}
+
+.blog_card .title > * {
+  text-align: center;
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden !important;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+
+.card_date {
+  @apply flex w-full text-sm;
+}
+.blog_card .card_date > * {
+  text-overflow: ellipsis;
+  overflow: hidden !important;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+.card_author {
+  @apply flex gap-2 w-full items-center text-sm;
+}
+
+.card_content {
+  @apply border-t pt-4 mt-4 text-xl md:text-2xl;
+}
+.blog_card .card_author > * {
+  text-overflow: ellipsis;
+  overflow: hidden !important;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+
+.blog_card > * {
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden !important;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+.visit_card {
+  @apply flex justify-center items-center absolute bottom-0 text-xl md:text-2xl  bg-[#e6532f] w-full h-[65px] text-white font-semibold lg:opacity-0;
+  transition: all 250ms ease-in-out;
+}
+.blog_card:hover .visit_card {
+  @apply opacity-100;
+}

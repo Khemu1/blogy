@@ -1,0 +1,54 @@
+/* styles/blog.module.css */
+
+.markdownPreview_page {
+  @apply leading-relaxed text-[1.15rem] box-border w-[inherit] h-[inherit];
+}
+
+.markdownPreview_page h1 {
+  @apply text-2xl;
+}
+
+.markdownPreview_page h2 {
+  @apply text-2xl mb-[inherit];
+}
+
+.markdownPreview_page h3 {
+  @apply text-xl mb-[inherit];
+}
+
+.markdownPreview_page h4 {
+  @apply text-lg mb-[inherit];
+}
+
+.markdownPreview_page h5 {
+  @apply text-base mb-[inherit];
+}
+
+.markdownPreview_page h6 {
+  @apply text-sm mb-[inherit];
+}
+
+.markdownPreview_page p {
+  @apply mb-[inherit] text-[inherit];
+}
+
+.markdownPreview_page ul,
+.markdownPreview_page ol {
+  @apply m-0 pl-6;
+}
+
+.markdownPreview_page li {
+  @apply mb-2;
+}
+
+.markdownPreview_page blockquote {
+  @apply border-l-2 border-gray-300 pl-4 my-4 text-gray-400;
+}
+
+.markdownPreview_page code {
+  @apply text-sm bg-gray-100 px-2 py-1 rounded;
+}
+
+.markdownPreview_page pre {
+  @apply text-sm bg-gray-100 p-4 rounded overflow-x-auto;
+}

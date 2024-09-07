@@ -2,12 +2,13 @@ import type { Config } from "tailwindcss";
 import daisyui from "daisyui";
 const config: Config = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx,module.css}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./styles/**/*.css",
   ],
   daisyui: {
-    themes: ["winter"],
+    themes: ["dim"],
   },
   theme: {
     extend: {

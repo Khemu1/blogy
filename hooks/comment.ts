@@ -8,24 +8,39 @@ import {
   editUserComment,
   getBlogComments,
 } from "@/utils/comment/commentAPI";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const useAddComment = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<CommentErrorProps | null>(null);
-
-  const handleAddComment = async (comment: NewCommentProps, blogId: number) => {
+  const [success, setSuccess] = useState(false);
+  const handleAddComment = async (blogId: number, content: string) => {
     try {
-      await addComment(comment, blogId);
+      setLoading(true);
+      await addComment(blogId, content);
+      setSuccess(true);
     } catch (error) {
       if (isCommentError(error)) setError(error);
-      else setError({ message: "adding failed" });
+      else setError({ message: "Adding Failed" });
     } finally {
       setLoading(false);
     }
   };
 
-  return { handleAddComment, loading, error };
+  useEffect(() => {
+    if (success) {
+      setTimeout(() => {
+        setSuccess(false);
+      }, 2000);
+    }
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+    }
+  }, [success, error]);
+
+  return { handleAddComment, loading, error, success };
 };
 
 //
@@ -109,7 +124,7 @@ export const useGetBlogComments = async () => {
   const [comments, setComments] = useState<CommentProps | []>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<CommentErrorProps | null>(null);
-  const handleEditUserComment = async (blogId: number) => {
+  const handleGetBlogComments = async (blogId: number) => {
     try {
       setComments(await getBlogComments(blogId));
     } catch (error) {
@@ -119,5 +134,5 @@ export const useGetBlogComments = async () => {
       setLoading(false);
     }
   };
-  return { handleEditUserComment, loading, error, comments };
+  return { handleGetBlogComments, loading, error, comments };
 };

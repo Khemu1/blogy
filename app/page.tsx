@@ -1,11 +1,12 @@
+"use client";
 
-export default function Home() {
-  return (
-    <main className="flex flex-col gap-2 h-full">
-      <h1>Home Page</h1>
-      <p>Welcome to the Home Page</p>
-    </main>
-    
-  );
-  
-}
+import { useGetBlogs } from "@/hooks/blog";
+import { useCallback, useEffect } from "react";
+import { BlogCard, Header, Pagination } from "./components/index";
+import { useSearchParams } from "next/navigation";
+
+const Home: React.FC = () => {
+  return <div>ma Home</div>;
+};
+
+export default Home;

@@ -8,40 +8,69 @@ import {
   deleteUserBlogs,
   getBlog,
 } from "../utils/blog/blogAPI";
-import { BlogErrorProps, BlogProps, EditBlogProp, NewBlogProp, ReturnedBlogProps } from "@/types";
+import {
+  BlogErrorProps,
+  BlogProps,
+  EditBlogProp,
+  NewBlogProp,
+  ReturnedBlogProps,
+} from "@/types";
 import { isBlogError } from "@/utils/blog";
 import { useRouter } from "next/navigation";
 
 export const useGetBlogs = () => {
-  const [loading, setloading] = useState(true);
-  const [blogs, setBlogs] = useState<BlogProps[]>([]);
-  const [error, seterror] = useState<BlogErrorProps | null>(null);
-  const handleGetBlogs = async () => {
-    try {
-      setBlogs(await getBlogs());
-    } catch (error) {
-      if (isBlogError(error)) {
-        seterror(error);
-      } else {
-        seterror({ message: "No Blogs Found" });
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<{
+    blogs: BlogProps[];
+    totalPages: number;
+  } | null>(null);
+  const [error, setError] = useState<BlogErrorProps | null>(null);
+
+  const handleGetBlogs = useCallback(
+    async (
+      q: string = "",
+      sortBy: string = "",
+      searchBy: string = "",
+      currentPage: number
+    ) => {
+      const searchParams = new URLSearchParams({
+        q,
+        sortBy,
+        searchBy,
+        page: currentPage.toString(),
+      });
+      try {
+        const url = `/api/blogs?${searchParams.toString()}`;
+        setLoading(true);
+        const fetchedBlogs = await getBlogs(url);
+        setData(fetchedBlogs);
+      } catch (error) {
+        if (isBlogError(error)) {
+          setError(error);
+        } else {
+          setError({ message: "No Blogs Found" });
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setloading(false);
-    }
-  };
-  return { handleGetBlogs, loading, error, blogs };
+    },
+    []
+  );
+
+  return { handleGetBlogs, loading, error, data };
 };
 
-export const useGetBlog = (id: number) => {
-  const [loading, setloading] = useState(true);
+export const useGetBlog = () => {
+  const [loading, setLoading] = useState(true);
   const [data, setData] = useState<ReturnedBlogProps | null>(null);
   const [error, setError] = useState<BlogErrorProps | null>(null);
 
-  const handleGetBlog = useCallback(async () => {
-    setloading(true); // Start loading before making the request
+  const handleGetBlog = useCallback(async (id: number) => {
+    setLoading(true);
     try {
-      const blogData = await getBlog(id ?? -1); // Fetch the blog
-      setData(blogData); // Set the blog state after fetching
+      const blogData = await getBlog(id);
+      setData(blogData);
+      setError(null);
     } catch (error) {
       if (isBlogError(error)) {
         setError(error);
@@ -49,9 +78,9 @@ export const useGetBlog = (id: number) => {
         setError({ message: "Blog Not Found" });
       }
     } finally {
-      setloading(false); // Stop loading after fetching or error
+      setLoading(false);
     }
-  }, [id]);
+  }, []);
 
   return { handleGetBlog, loading, error, data };
 };

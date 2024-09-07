@@ -7,7 +7,7 @@ export async function addBlogMiddleware(req: NextRequest) {
   const data: { title: string; content: string } = await req.json();
 
   if (!data || !data.title || !data.content) {
-    return NextResponse.json({ message: "Invalid data" }, { status: 400 });
+    return NextResponse.json({ message: "Invalid Blog Data" }, { status: 400 });
   }
   try {
     const schema = getNewBlogSchema();
@@ -16,7 +16,7 @@ export async function addBlogMiddleware(req: NextRequest) {
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { message: "Validation failed", errors: validateWithSchema(error) },
+        { errors: validateWithSchema(error) },
         { status: 400 }
       );
     } else {
