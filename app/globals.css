@@ -15,7 +15,9 @@ textarea {
   @apply px-2 py-1 rounded-lg resize-none overflow-hidden h-auto border-b-4 w-full;
   transition: border-bottom-color 250ms ease-in-out;
 }
-
+.form_input {
+  height: 40px;
+}
 label {
   @apply font-semibold;
 }
@@ -62,4 +64,29 @@ textarea:focus {
 }
 .feat:active {
   transform: scale(1.03);
+}
+.account_info {
+  @apply flex gap-2 items-center text-xl;
+}
+.account_info span {
+  @apply font-extrabold;
+}
+
+.my_blog_title > *,
+.blog_card_content > * {
+  text-overflow: ellipsis;
+  overflow: hidden !important;
+  white-space: nowrap;
+  width: 100%;
+  max-width: 100%;
+}
+.account_info > label {
+  width: max-content;
+}
+.account_info > input {
+  width: max-content;
+}
+.account_info {
+  display: grid;
+  grid: 1fr 1fr / 1fr;
 }

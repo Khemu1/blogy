@@ -6,58 +6,67 @@ import {
 import { addCommentMiddleware } from "./middlewares/comments/middleware";
 import { addBlogMiddleware } from "./middlewares/blogs/middleware";
 import { validateUser } from "./middlewares/auth";
-import { getBlogComments } from "./middlewares/auth/userId";
+import { sendUserIdIfExists } from "./middlewares/auth/userId";
+import { errorHandler } from "./middlewares/error/ErrorHandler"; // Import your error handler
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  try {
+    const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith("/api/users/login")) {
-    const response = await loginMiddleware(req);
-    if (!response.ok) return response;
-
-    return response;
-  }
-
-  if (/^\/api\/comments\/\d+$/.test(pathname)) {
-    console.log("comment");
-
-    if (req.method === "GET") {
-      const checkId = await getBlogComments(req);
-      return checkId; // Return directly the response from `getBlogComments`
+    // Route-specific handling
+    if (pathname.startsWith("/api/auth/login")) {
+      return await loginMiddleware(req);
+    }
+    if (pathname.startsWith("/api/auth/register")) {
+      return await registerMiddleware(req);
     }
 
-    // Validate the user
-    const userValidationResponse = await validateUser(req);
-    if (!userValidationResponse.ok) return userValidationResponse;
+    if (pathname.startsWith("/api/comments")) {
+      // Check if it's a GET request for comments
+      if (req.method === "GET" && /^\/api\/comments\/\d+$/.test(pathname)) {
+        return await sendUserIdIfExists(req);
+      }
 
-    // Make sure the new response contains all cookies and headers
+      // Validate user for other comment-related actions
+      const userValidationResponse = await validateUser(req);
+      if (!userValidationResponse.ok) return userValidationResponse;
 
-    const commentValidation = await addCommentMiddleware(req);
-    if (!commentValidation.ok) return commentValidation;
-    return userValidationResponse;
-  }
-
-  if (/^\/api\/blogs\/\d+$/.test(pathname)) {
-    console.log("i did check id");
-    if (req.method === "GET") {
-      const checkId = await getBlogComments(req);
-      return checkId;
+      // Pass request to comment middleware
+      if (req.method === "POST") {
+        return await addCommentMiddleware(req, userValidationResponse);
+      }
+      return userValidationResponse;
     }
-  } else if (pathname === "/api/blogs") {
-    const userValidationResponse = await validateUser(req);
 
-    if (!userValidationResponse.ok) return userValidationResponse;
-    return userValidationResponse;
+    if (pathname.startsWith("/api/blogs")) {
+      // Handle GET request for a specific blog
+      if (req.method === "GET" && /^\/api\/blogs\/\d+$/.test(pathname)) {
+        return await sendUserIdIfExists(req);
+      }
+      const userValidationResponse = await validateUser(req);
+      if (!userValidationResponse.ok) return userValidationResponse;
+      if (req.method === "POST") {
+        return await addBlogMiddleware(req, userValidationResponse);
+      }
+      return userValidationResponse;
+    }
+
+    if (pathname === "/api/users/myInfo") {
+      console.log("yesssss my info");
+      return await validateUser(req);
+    }
+    return NextResponse.next();
+  } catch (error) {
+    console.log("error from root middleware", error);
+    return errorHandler(error, req);
   }
-
-  // Ensure that cookies set in any of the middleware are included in the final response
 }
 
 export const config = {
   matcher: [
-    "/api/users/register",
-    "/api/users/login",
-    "/api/blogs",
+    "/api/auth",
+    "/api/blogs/:path*",
     "/api/comments/:path*",
+    "/api/users/myInfo",
   ],
 };

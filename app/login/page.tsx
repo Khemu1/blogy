@@ -34,18 +34,18 @@ const Login = () => {
     <div className="flex justify-center items-center h-full">
       <form
         action=""
-        className="flex flex-col  justify-between gap-5 bg-slate-200 w-max p-4 rounded-lg overflow-hi"
+        className="flex justify-around flex-col bg-base-200 min-h-[400px] w-max p-4 rounded-lg"
         onSubmit={(e: React.FormEvent) => handleSubmit(formData, e)}
       >
-        <h2 className="font-extrabold text-2xl m-auto">Login</h2>
+        <h2 className="font-extrabold text-2xl mx-auto">Login</h2>
         <div>
           <div className={styles.inputContainer}>
             <label>Email or Username :</label>
             <input
               id="emailOrUsername"
-              className={
+              className={`form_input ${
                 errors?.emailOrUsername ? styles.error_bottom_border : ""
-              }
+              }`}
               type="text"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -68,11 +68,12 @@ const Login = () => {
             <label>Password :</label>
             <input
               id="password"
-              className={
-                errors?.password || ApiError?.password
-                  ? styles.error_bottom_border
-                  : ""
-              }
+              className={`form_input 
+                ${
+                  errors?.password || ApiError?.password
+                    ? styles.error_bottom_border
+                    : ""
+                }`}
               type="password"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -92,7 +93,7 @@ const Login = () => {
         </div>
         <button
           type="submit"
-          className="h-max w-max m-auto text-xl bg-slate-300 px-5 py-1 rounded-lg transition-all hover:bg-white font-extrabold"
+          className="h-max w-max mx-auto text-xl bg-[#eb512b] text-white px-5 py-1 rounded-lg transition-all font-extrabold"
         >
           Login
         </button>

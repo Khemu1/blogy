@@ -31,7 +31,7 @@ const Blog: React.FC<Props> = ({ params: { id } }) => {
 
   return (
     <div className="flex flex-col gap-6  items-center my-4 px-3">
-      <BlogPage blogData={data.blogData} comments={data.comments} />
+      <BlogPage key={data.id} blogData={{ ...data }} comments={data.comments} />
     </div>
   );
 };

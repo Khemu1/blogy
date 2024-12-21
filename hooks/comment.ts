@@ -2,8 +2,8 @@ import { CommentErrorProps, NewCommentProps, CommentProps } from "@/types";
 import { isCommentError } from "@/utils/comment";
 import {
   addComment,
+  deleteComment,
   deleteMyComment,
-  deleteUserComment,
   editMyComment,
   editUserComment,
   getBlogComments,
@@ -62,13 +62,14 @@ export const useDeleteMyComment = () => {
   return { handleDeleteMyComment, loading, error };
 };
 
-export const useDeleteUserComment = () => {
-  const [loading, setLoading] = useState(true);
+export const useDeleteComment = () => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<CommentErrorProps | null>(null);
 
-  const handleDeleteMyComment = async (id: number) => {
+  const handleDeleteComment = async (id: number) => {
     try {
-      await deleteUserComment(id);
+      setLoading(true);
+      await deleteComment(id);
     } catch (error) {
       if (isCommentError(error)) setError(error);
       else setError({ message: "Deletion failed" });
@@ -77,7 +78,7 @@ export const useDeleteUserComment = () => {
     }
   };
 
-  return { handleDeleteMyComment, loading, error };
+  return { handleDeleteComment, loading, error };
 };
 
 export const useEditMyComment = async () => {

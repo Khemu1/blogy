@@ -1,7 +1,7 @@
-import { verifyToken } from "@/utils/auth";
+import { verifyToken } from "@/services/auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function getBlogComments(req: NextRequest) {
+export async function sendUserIdIfExists(req: NextRequest) {
   console.log(" Id cheker middleware up");
   try {
     // Retrieve tokens from cookies

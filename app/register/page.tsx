@@ -38,7 +38,7 @@ const Register = () => {
     <div className="flex justify-center items-center h-full">
       <form
         action=""
-        className="flex flex-col  justify-between gap-5 bg-slate-200 w-max p-4 rounded-lg overflow-hi"
+        className="flex flex-col  justify-between gap-10 bg-base-200 w-[75dvw] sm:w-max min-h-[500px] p-4 rounded-lg overflow-hidden"
         onSubmit={(e: React.FormEvent) => handleSubmit(formData, e)}
       >
         <h2 className="font-semibold text-xl m-auto">sign Up</h2>
@@ -47,11 +47,12 @@ const Register = () => {
             <label>Email :</label>
             <input
               id="email"
-              className={
-                errors?.email || ApiError?.email
-                  ? styles.error_bottom_border
-                  : ""
-              }
+              className={`form_input 
+                ${
+                  errors?.email || ApiError?.email
+                    ? styles.error_bottom_border
+                    : ""
+                }`}
               type="Email"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -72,11 +73,11 @@ const Register = () => {
             <label>Username :</label>
             <input
               id="username"
-              className={
+              className={`form_input ${
                 errors?.username || ApiError?.username
                   ? styles.error_bottom_border
                   : ""
-              }
+              }`}
               type="text"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -99,11 +100,11 @@ const Register = () => {
             <label>Password :</label>
             <input
               id="password"
-              className={
+              className={`form_input ${
                 errors?.password || ApiError?.password
                   ? styles.error_bottom_border
                   : ""
-              }
+              }`}
               type="password"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -126,9 +127,9 @@ const Register = () => {
             <label>Confirm Password : </label>
             <input
               id="confirmPassword"
-              className={
+              className={`form_input ${
                 errors?.confirmPassword ? styles.error_bottom_border : ""
-              }
+              }`}
               type="password"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setformData((prev) => ({
@@ -149,7 +150,7 @@ const Register = () => {
         </div>
         <button
           type="submit"
-          className="h-max w-max m-auto text-xl bg-slate-300 px-5 py-1 rounded-lg transition-all hover:bg-white font-extrabold"
+          className="h-max w-max m-auto text-xl bg-[#eb512b] text-white px-5 py-1 rounded-lg transition-all  font-extrabold"
         >
           Register
         </button>

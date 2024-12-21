@@ -22,7 +22,9 @@ const Comment: React.FC<{ commentData: CommentProps; last: boolean }> = ({
         />
       </Link>
       <div className="flex flex-col gap-2 mt-4">
-        <span className="text-xl font-semibold">{commentData.author}</span>
+        <span className="text-xl font-semibold">
+          {commentData.user.username}
+        </span>
         <p>{commentData.content}</p>
       </div>
     </div>

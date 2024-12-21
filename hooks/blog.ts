@@ -2,18 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import {
   addBlog,
   getBlogs,
-  getUserBlogs,
   editBlog,
-  deleteUserBlog,
   deleteUserBlogs,
   getBlog,
+  deleteBlog,
 } from "../utils/blog/blogAPI";
 import {
+  AllBlogProps,
   BlogErrorProps,
   BlogProps,
   EditBlogProp,
   NewBlogProp,
-  ReturnedBlogProps,
 } from "@/types";
 import { isBlogError } from "@/utils/blog";
 import { useRouter } from "next/navigation";
@@ -21,7 +20,7 @@ import { useRouter } from "next/navigation";
 export const useGetBlogs = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<{
-    blogs: BlogProps[];
+    blogs: AllBlogProps[];
     totalPages: number;
   } | null>(null);
   const [error, setError] = useState<BlogErrorProps | null>(null);
@@ -62,7 +61,7 @@ export const useGetBlogs = () => {
 
 export const useGetBlog = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<ReturnedBlogProps | null>(null);
+  const [data, setData] = useState<BlogProps | null>(null);
   const [error, setError] = useState<BlogErrorProps | null>(null);
 
   const handleGetBlog = useCallback(async (id: number) => {
@@ -123,11 +122,14 @@ export const useAddBlog = () => {
 };
 
 export const useEditBlog = () => {
-  const [loading, setloading] = useState(true);
+  const [loading, setloading] = useState(false);
+  const [success,setSuccess] = useState(true);
   const [error, setError] = useState<BlogErrorProps | null>(null);
   const handleEditBlog = async (id: number, data: EditBlogProp) => {
     try {
+      setloading(true);
       await editBlog(id, data);
+      setSuccess(true);
     } catch (error) {
       if (isBlogError(error)) {
         setError(error);
@@ -138,17 +140,17 @@ export const useEditBlog = () => {
       setloading(false);
     }
   };
-  return { handleEditBlog, loading, error };
+  return { handleEditBlog, loading, error,success };
 };
 
 export const useDeleteBlog = () => {
-  const [loading, setloading] = useState(true);
-  const [blogs, setBlogs] = useState(false);
+  const [loading, setloading] = useState(false);
   const [error, setError] = useState<BlogErrorProps | null>(null);
-  const handleDeleteBlog = async (blogId: number, userId: number) => {
+
+  const handleDeleteBlog = async (blogId: number) => {
     try {
-      await deleteUserBlog(blogId, userId);
-      setBlogs(await getUserBlogs(userId));
+      setloading(true);
+      await deleteBlog(blogId);
     } catch (error) {
       if (isBlogError(error)) {
         setError(error);
@@ -159,7 +161,7 @@ export const useDeleteBlog = () => {
       setloading(false);
     }
   };
-  return { handleDeleteBlog, blogs, loading, error };
+  return { handleDeleteBlog, loading, error };
 };
 
 export const useDeleteUserBlogs = () => {

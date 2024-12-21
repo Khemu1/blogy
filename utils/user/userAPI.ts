@@ -2,7 +2,7 @@ import { LoginFormProps, RegisterFormProps } from "@/types";
 
 export const loginUser = async (data: LoginFormProps) => {
   try {
-    const response = await fetch(`/api/users/login`, {
+    const response = await fetch(`/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -30,7 +30,7 @@ export const loginUser = async (data: LoginFormProps) => {
 
 export const addUser = async (data: RegisterFormProps) => {
   try {
-    const response = await fetch("/api/users/register", {
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -53,9 +53,9 @@ export const addUser = async (data: RegisterFormProps) => {
   }
 };
 
-export const getUser = async (id: number) => {
+export const getMyInfo = async () => {
   try {
-    const response = await fetch(`/api/users/${id}`, {
+    const response = await fetch(`/api/users/myInfo`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

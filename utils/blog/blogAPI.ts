@@ -76,6 +76,7 @@ export const addBlog = async (
   data: NewBlogProp
 ): Promise<{ blogId: number } | BlogErrorProps> => {
   try {
+    console.log("add the fucken blog");
     const response = await fetch("/api/blogs", {
       method: "POST",
       headers: {
@@ -125,9 +126,9 @@ export const editBlog = async (id: number, data: EditBlogProp) => {
   }
 };
 
-export const deleteUserBlog = async (blogId: number, userId: number) => {
+export const deleteBlog = async (blogId: number,) => {
   try {
-    const response = await fetch(`/api/users/${userId}/blog/${blogId}`, {
+    const response = await fetch(`/api/blogs/${blogId}`, {
       method: "Delete",
       headers: {
         "Content-Type": "application/json",

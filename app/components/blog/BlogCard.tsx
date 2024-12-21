@@ -1,12 +1,12 @@
 "use client";
-import { BlogProps } from "@/types";
+import { AllBlogProps } from "@/types";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { useEffect, useState } from "react";
 import "../../styles/blogCard.css"; // Import the CSS module
 import Link from "next/link";
 
-const BlogCard: React.FC<{ cardData: BlogProps }> = ({ cardData }) => {
+const BlogCard: React.FC<{ cardData: AllBlogProps }> = ({ cardData }) => {
   const [sanitizedTitle, setSanitizedTitle] = useState<string>(cardData.title);
   const [sanitizedContent, setSanitizedContent] = useState<string>("");
 
@@ -53,10 +53,10 @@ const BlogCard: React.FC<{ cardData: BlogProps }> = ({ cardData }) => {
       </div>
       <div className="card_author">
         <span className="font-extrabold">Author : </span>{" "}
-        <span className="font-semibold">{cardData.author}</span>
+        <span className="font-semibold">{cardData.user.username}</span>
       </div>
       <div
-        className={`card_content text_overflow flex`}
+        className={`card_content blog_card_content flex`}
         dangerouslySetInnerHTML={{ __html: sanitizedTitle }}
       ></div>
       <Link href={`/blogs/${cardData.id}`} className="visit_card">

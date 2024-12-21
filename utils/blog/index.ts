@@ -1,5 +1,5 @@
-import { BlogErrorProps, LoginErrorProps, RegisterErrorProps } from "@/types";
-import { object, string, ZodError, ZodIssueCode } from "zod";
+import { BlogErrorProps } from "@/types";
+import { object, string, ZodError } from "zod";
 
 export const validateWithSchema = <T>(error: any) => {
   if (error instanceof ZodError) {
@@ -33,7 +33,7 @@ export const getNewBlogSchema = () => {
    */
 };
 
-export const editBlog = (title: string, content: string) => {
+export const getEditBlogSchema = (title: string, content: string) => {
   return object({
     title: string({
       required_error: "Email or Username is required",

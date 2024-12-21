@@ -19,8 +19,18 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "typeRoots": ["./config/config.d.ts"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "migrations/20240830201547-create-users-table.cjs", "sequelizerc.js", "migrations/20240830202017-create-blog-table.cjs", "migrations/20240830202114-create-comment-table.cjs"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "sequelizerc.js",
+    "config",
+    "db",
+    "./config/config.d.ts"
+  ],
   "exclude": ["node_modules"]
 }

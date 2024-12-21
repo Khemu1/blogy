@@ -1,3 +1,7 @@
+export enum ROLES {
+  ADMIN = "admin",
+  USER = "user",
+}
 export interface RegisterFormProps {
   email: string;
   username: string;
@@ -9,12 +13,26 @@ export interface LoginFormProps {
   emailOrUsername: string;
   password: string;
 }
+export interface MyInfoProps extends UserProps {
+  Blogs: BlogProps[];
+  comments: CommentProps[];
+}
+export interface NewUserProps {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+}
 
 export interface UserProps {
   id: number;
-  name: string;
+  username: string;
   email: string;
   password: string;
+  roleId?: ROLES;
+  createdAt: Date;
+  updatedAt?: Date;
+  deletedAt?: Date | null;
 }
 
 export interface NewBlogProp {
@@ -31,9 +49,31 @@ export interface BlogProps {
   userId: number;
   title: string;
   content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: { username: string };
+  comments: CommentProps[];
+}
+export interface updateBlogParams {
+  title: string;
+  content: string;
+}
+export interface MyProfileBlogs {
+  id: number;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export interface AllBlogProps {
+  id: number;
+  userId: number;
+  title: string;
+  content: string;
   author: string;
   createdAt: Date;
   updatedAt: Date;
+  user: { username: string };
 }
 
 export interface LoginErrorProps {
@@ -63,10 +103,14 @@ export interface CommentProps {
   id: number;
   userId: number;
   blogId: number;
-  author: string;
+  content: string;
+  user: { username: string };
+}
+export interface MyProfileComments {
+  id: number;
+  blogId: number;
   content: string;
 }
-
 export interface CommentErrorProps {
   message?: string;
   content?: string;
@@ -81,13 +125,53 @@ export interface TOKENProps {
   iat: number;
 }
 
-export interface ReturnedBlogProps {
-  blogData: BlogProps;
-  comments: CommentProps[];
-}
-
 export type SearchParams = {
   q?: string | null;
   searchBy?: string | null;
   sortBy?: string | null;
 };
+
+export interface UserModel {
+  id: number;
+  roleId: number;
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
+
+export interface BlogModel {
+  id: number;
+  userId: number;
+  title: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
+
+export interface CommentModel {
+  id: number;
+  userId: number;
+  blogId: number;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
+
+export interface RoleModel {
+  id: number;
+  name: ROLES;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export interface UserRoleModel {
+  id: number;
+  userId: number;
+  roleId: number;
+  createdAt: Date;
+  updatedAt: Date;
+}

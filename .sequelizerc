@@ -1,0 +1,14 @@
+const path = require("path");
+const dotenv = require("dotenv");
+
+// Ensure the environment variables are loaded
+const envPath = path.join(process.cwd(), ".env");
+dotenv.config({ path: envPath });
+
+
+module.exports = {
+  config: path.resolve("config", "config.mjs"),
+  "models-path": path.resolve("db", "models"),
+  "seeders-path": path.resolve("db", "seeders"),
+  "migrations-path": path.resolve("db", "migrations"),
+};

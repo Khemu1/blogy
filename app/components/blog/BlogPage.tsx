@@ -42,7 +42,7 @@ const BlogPage: React.FC<{ blogData: BlogProps; comments: CommentProps[] }> = ({
         <div className="flex flex-col gap-2 mb-5">
           <div>
             <span className="font-extrabold">Author : </span>
-            <span className="font-semibold">{blogData.author}</span>
+            <span className="font-semibold">{blogData.user?.username}</span>
           </div>
           <div>
             <div>

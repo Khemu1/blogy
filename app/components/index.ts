@@ -6,6 +6,12 @@ import BlogPage from "./blog/BlogPage";
 import Filter from "./general/Filter";
 import Header from "./general/Header";
 import Pagination from "./general/Pagination";
+import MyBlogs from "./myprofile/MyBlogs";
+import MyInfo from "./myprofile/MyInfo";
+import MyComments from "./myprofile/MyComments";
+import MyBlog from "./myprofile/MyBlog";
+import MyComment from "./myprofile/MyComment";
+import BlogEditDialog from "./blog/BlogEditDialog";
 
 export {
   CommentForm,
@@ -16,4 +22,10 @@ export {
   Filter,
   Header,
   Pagination,
+  MyBlogs,
+  MyInfo,
+  MyComments,
+  MyBlog,
+  MyComment,
+  BlogEditDialog,
 };
