@@ -12,7 +12,6 @@ export const POST = async (req: NextRequest) => {
   try {
     const body = (await req.json()) as NewBlogProp;
     const userId = req.headers.get("X-User-Id") as string;
-    console.log(userId);
     await initializeDatabase();
     const blogId = await addBlogService(body, +userId);
     return NextResponse.json({ blogId }, { status: 201 });

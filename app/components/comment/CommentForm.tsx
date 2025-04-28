@@ -1,5 +1,5 @@
 "use client";
-import { useAddComment, useGetBlogComments } from "../../../hooks/comment";
+import { useAddComment, useGetBlogComments } from "../../hooks/comment";
 import { getCommentSchema, validateWithSchema } from "@/utils/comment";
 import { useEffect, useRef, useState } from "react";
 import { ZodError } from "zod";

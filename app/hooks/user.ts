@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { addUser, getMyInfo, loginUser } from "../utils/user/userAPI";
+import { addUser, getMyInfo, loginUser } from "../../utils/user/userAPI";
 import {
   LoginFormProps,
   RegisterFormProps,

@@ -1,5 +1,5 @@
 "use client";
-import { useAddBlog } from "@/hooks/blog";
+import { useAddBlog } from "@/app/hooks/blog";
 import { NewBlogProp } from "@/types";
 import { useState, useEffect, useRef } from "react";
 import { getNewBlogSchema, validateWithSchema } from "@/utils/blog";

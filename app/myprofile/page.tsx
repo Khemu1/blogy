@@ -1,5 +1,5 @@
 "use client";
-import { useGetMyInfo } from "@/hooks/user";
+import { useGetMyInfo } from "@/app/hooks/user";
 import { useEffect, useState } from "react";
 import { MyInfo, MyBlogs, MyComments } from "../components/index";
 import { notFound } from "next/navigation";

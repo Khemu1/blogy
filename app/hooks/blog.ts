@@ -6,7 +6,7 @@ import {
   deleteUserBlogs,
   getBlog,
   deleteBlog,
-} from "../utils/blog/blogAPI";
+} from "../../utils/blog/blogAPI";
 import {
   AllBlogProps,
   BlogErrorProps,
@@ -123,7 +123,7 @@ export const useAddBlog = () => {
 
 export const useEditBlog = () => {
   const [loading, setloading] = useState(false);
-  const [success,setSuccess] = useState(true);
+  const [success, setSuccess] = useState(true);
   const [error, setError] = useState<BlogErrorProps | null>(null);
   const handleEditBlog = async (id: number, data: EditBlogProp) => {
     try {
@@ -140,7 +140,7 @@ export const useEditBlog = () => {
       setloading(false);
     }
   };
-  return { handleEditBlog, loading, error,success };
+  return { handleEditBlog, loading, error, success };
 };
 
 export const useDeleteBlog = () => {

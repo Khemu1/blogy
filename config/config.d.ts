@@ -1,6 +1,6 @@
 export interface DatabaseConfig {
   username: string;
-  password: string;
+  password: string | null;
   database: string;
   host: string;
   dialect: string;

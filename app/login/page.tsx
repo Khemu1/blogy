@@ -4,7 +4,7 @@ import styles from "../styles/form.module.css";
 import { loginSchema, validateWithSchema } from "@/utils/user";
 import { useState } from "react";
 import { ZodError } from "zod";
-import { useLoginUser } from "@/hooks/user";
+import { useLoginUser } from "@/app/hooks/user";
 
 const Login = () => {
   const schema = loginSchema();

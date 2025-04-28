@@ -2,7 +2,7 @@
 import { MyProfileBlogs } from "@/types";
 import MyBlog from "./MyBlog";
 import { useState } from "react";
-import { useDeleteBlog } from "@/hooks/blog";
+import { useDeleteBlog } from "@/app/hooks/blog";
 
 const MyBlogs: React.FC<{ blogs: MyProfileBlogs[] | [] }> = ({ blogs }) => {
   const [AllBlogs, setAllBlogs] = useState<MyProfileBlogs[]>(blogs);

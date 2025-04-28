@@ -1,4 +1,4 @@
-import { useEditBlog } from "@/hooks/blog";
+import { useEditBlog } from "@/app/hooks/blog";
 import { NewBlogProp } from "@/types";
 import { getEditBlogSchema, validateWithSchema } from "@/utils/blog";
 import DOMPurify from "dompurify";

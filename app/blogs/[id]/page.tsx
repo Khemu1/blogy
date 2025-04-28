@@ -1,5 +1,5 @@
 "use client";
-import { useGetBlog } from "@/hooks/blog";
+import { useGetBlog } from "@/app/hooks/blog";
 import { notFound } from "next/navigation";
 import { useEffect } from "react";
 import BlogPage from "@/app/components/blog/BlogPage";

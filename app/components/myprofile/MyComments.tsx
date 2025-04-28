@@ -1,7 +1,7 @@
 import { MyProfileComments } from "@/types";
 import React, { useState } from "react";
 import MyComment from "./MyComment";
-import { useDeleteComment } from "@/hooks/comment"; 
+import { useDeleteComment } from "@/app/hooks/comment";
 
 const MyComments: React.FC<{ comments: MyProfileComments[] | [] }> = ({
   comments,
@@ -9,7 +9,7 @@ const MyComments: React.FC<{ comments: MyProfileComments[] | [] }> = ({
   const [AllComments, setAllComments] = useState<MyProfileComments[] | []>(
     comments || []
   );
-  const { error, loading, handleDeleteComment } = useDeleteComment(); 
+  const { error, loading, handleDeleteComment } = useDeleteComment();
 
   const handleDelete = async (commentId: number) => {
     try {

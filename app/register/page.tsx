@@ -5,7 +5,7 @@ import styles from "../styles/form.module.css";
 import { registerSchema, validateWithSchema } from "@/utils/user";
 import { RegisterFormProps } from "@/types";
 import { ZodError } from "zod";
-import { useAddUser } from "@/hooks/user";
+import { useAddUser } from "@/app/hooks/user";
 
 const Register = () => {
   const schema = registerSchema();
