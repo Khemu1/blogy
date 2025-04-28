@@ -1,5 +1,5 @@
 import React from "react";
-import { UserProps } from "../../../types/index";
+import { UserProps } from "../../types/index";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 

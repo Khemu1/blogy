@@ -1,7 +1,7 @@
 import User from "@/db/models/User";
 import Comment from "@/db/models/Comment";
 import { CustomError } from "@/middlewares/error/CustomError";
-import { NewCommentProps } from "@/types";
+import { NewCommentProps } from "@/app/types";
 
 const addCommentService = async (
   data: {
@@ -94,4 +94,35 @@ const updateCommentService = async (
   }
 };
 
-export { addCommentService, deleteCommentService, updateCommentService };
+const getBlogCommentsService = async (blogId: number) => {
+  try {
+    if (!blogId || isNaN(blogId)) {
+      throw new CustomError(
+        "invalid blog id",
+        400,
+        "try checking blog id",
+        true
+      );
+    }
+    const comments = await Comment.findAll({
+      where: { blogId: blogId },
+      include: [
+        {
+          model: User,
+          attributes: ["username"],
+        },
+      ],
+    });
+    return comments;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export {
+  addCommentService,
+  deleteCommentService,
+  updateCommentService,
+  getBlogCommentsService,
+};

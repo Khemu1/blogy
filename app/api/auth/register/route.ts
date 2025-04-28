@@ -1,4 +1,3 @@
-import { RegisterFormProps, UserProps } from "@/types";
 import { initializeDatabase } from "@/config/dbInit";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -8,6 +7,7 @@ import {
 } from "@/services/auth";
 import { registerUserService } from "@/services/authServices";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
+import { RegisterFormProps } from "@/app/types";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +17,10 @@ export async function POST(req: NextRequest) {
     const user = await registerUserService(data);
     const { accessToken, refreshToken } = await createTokens(user.id);
     const response = NextResponse.json(
-      { message: "User created successfully", username: user.username },
+      {
+        message: "User created successfully",
+        user: { username: user.username, id: user.id },
+      },
       { status: 201 }
     );
     response.cookies.set("accessToken", accessToken, accessCookieOptions);

@@ -1,39 +1,46 @@
+// dbInit.ts
+
 import Blog from "@/db/models/Blog";
 import sequelize from "./db";
 import User from "@/db/models/User";
-import Comment from "@/db/models/Comment"
+import Comment from "@/db/models/Comment";
 
+let initialized = false;
 
 async function testConnection() {
   try {
     await sequelize.authenticate();
-    console.log("Connection has been established successfully.");
+    console.log("✅ Database connection established.");
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("❌ Unable to connect to the database:", error);
+    throw error;
   }
 }
 
 async function syncModels() {
   try {
-    /**
-     * true is commonly used during development when you are actively modifying your models and want Sequelize to automatically update the database schema to match the model definitions.
-It can be convenient because it automatically alters existing tables to add new columns or change column types without having to manually write SQL ALTER TABLE statements
-     */
     await sequelize.sync();
-    console.log("Models have been synchronized successfully.");
+    console.log("✅ Models synchronized.");
   } catch (error) {
-    console.error("Error synchronizing models:", error);
+    console.error("❌ Error synchronizing models:", error);
+    throw error;
   }
 }
+
 async function initializeDatabase() {
+  if (initialized) {
+    return;
+  }
+
   await testConnection();
-  /**
-   * setting up assocations before syncing the models tells sequelize how to link models
-   */
+
   User.associate();
   Blog.associate();
   Comment.associate();
+
   await syncModels();
+
+  initialized = true;
 }
 
 export { initializeDatabase };

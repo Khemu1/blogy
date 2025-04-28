@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Nav from "./components/general/Nav";
+import Wrapper from "./Wrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,8 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Nav />
-        <main className="flex flex-col gap-3 h-full">{children}</main>
+        <Wrapper>
+          <Nav />
+          <main className="flex flex-col gap-3 h-full">{children}</main>
+        </Wrapper>
       </body>
     </html>
   );

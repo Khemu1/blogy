@@ -1,36 +1,27 @@
-import { cookies, headers } from "next/headers";
-import {
-  generateAccessToken,
-  verifyToken,
-  accessCookieOptions,
-} from "@/services/auth";
+import { cookies } from "next/headers";
+import { generateAccessToken, verifyToken } from "@/services/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { CustomError } from "../error/CustomError";
-import { errorHandler } from "../error/ErrorHandler";
+import { CustomError } from "@/middlewares/error/CustomError";
+import { errorHandler } from "@/middlewares/error/ErrorHandler";
 
 export async function validateUser(req: NextRequest) {
   console.log("user middleware up");
 
   try {
     const cookieStore = cookies();
-
     const accessToken = cookieStore.get("accessToken")?.value;
     const refreshToken = cookieStore.get("refreshToken")?.value;
 
     if (!accessToken && !refreshToken) {
-      throw new CustomError("No tokens provided", 401, "Please log in.", true);
+      return NextResponse.redirect(new URL("/login", req.url));
     }
 
     if (accessToken) {
       const accessTokenData = await verifyToken(accessToken, true);
 
       if (!accessTokenData) {
-        throw new CustomError(
-          "Invalid access token",
-          401,
-          "Access token is invalid or expired.",
-          true
-        );
+        // Invalid access token, redirect to /login
+        return NextResponse.redirect(new URL("/login", req.url));
       }
 
       const response = NextResponse.next();
@@ -44,12 +35,7 @@ export async function validateUser(req: NextRequest) {
       const refreshTokenData = await verifyToken(refreshToken, false);
 
       if (!refreshTokenData) {
-        throw new CustomError(
-          "Invalid refresh token",
-          401,
-          "Refresh token is invalid or expired.",
-          true
-        );
+        return NextResponse.redirect(new URL("/login", req.url));
       }
 
       const newAccessToken = await generateAccessToken({
@@ -57,19 +43,14 @@ export async function validateUser(req: NextRequest) {
       });
 
       const response = NextResponse.next();
-      response.cookies.set("accessToken", newAccessToken, accessCookieOptions);
+      response.cookies.set("accessToken", newAccessToken, { path: "/" });
       response.cookies.set("X-User-Id", refreshTokenData.id as string);
-
       response.headers.set("X-User-Id", refreshTokenData.id as string);
+
       return response;
     }
 
-    throw new CustomError(
-      "User validation failed",
-      500,
-      "Unknown error occurred.",
-      true
-    );
+    return NextResponse.redirect(new URL("/login", req.url));
   } catch (error) {
     console.error("Error with user validation:", error);
     return errorHandler(error, req);

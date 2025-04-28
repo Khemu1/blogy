@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getNewBlogSchema, validateWithSchema } from "@/utils/blog";
+import { getNewBlogSchema, validateWithSchema } from "@/app/utils/blog";
 import { ZodError } from "zod";
 import { errorHandler } from "../error/ErrorHandler";
 

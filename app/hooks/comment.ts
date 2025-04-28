@@ -1,5 +1,5 @@
-import { CommentErrorProps, NewCommentProps, CommentProps } from "@/types";
-import { isCommentError } from "@/utils/comment";
+import { CommentErrorProps, NewCommentProps, CommentProps } from "@/app/types";
+import { isCommentError } from "@/app/utils/comment";
 import {
   addComment,
   deleteComment,
@@ -7,8 +7,9 @@ import {
   editMyComment,
   editUserComment,
   getBlogComments,
-} from "@/utils/comment/commentAPI";
+} from "@/app/utils/comment/commentAPI";
 import { useEffect, useState } from "react";
+import { set } from "zod";
 
 export const useAddComment = () => {
   const [loading, setLoading] = useState(false);
@@ -121,13 +122,17 @@ export const useEditUserComment = async () => {
   return { handleEditUserComment, loading, error };
 };
 
-export const useGetBlogComments = async () => {
-  const [comments, setComments] = useState<CommentProps | []>([]);
+export const useGetBlogComments = () => {
+  const [comments, setComments] = useState<CommentProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<CommentErrorProps | null>(null);
+  const [success, setSuccess] = useState(false);
   const handleGetBlogComments = async (blogId: number) => {
     try {
-      setComments(await getBlogComments(blogId));
+      const fetchedComments = await getBlogComments(blogId);
+      console.log("fetchedComments", fetchedComments.comments);
+      setComments(fetchedComments.comments);
+      setSuccess(true);
     } catch (error) {
       if (isCommentError(error)) setError(error);
       else setError({ message: "Editing failed" });
@@ -135,5 +140,5 @@ export const useGetBlogComments = async () => {
       setLoading(false);
     }
   };
-  return { handleGetBlogComments, loading, error, comments };
+  return { handleGetBlogComments, loading, error, comments, success };
 };

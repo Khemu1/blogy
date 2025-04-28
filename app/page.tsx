@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { aboutBlogy, blogyFeatures } from "@/constants";
+import { blogyFeatures } from "@/constants";
 
 const Home: React.FC = () => {
   return (

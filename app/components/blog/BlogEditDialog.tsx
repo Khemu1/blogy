@@ -1,6 +1,6 @@
 import { useEditBlog } from "@/app/hooks/blog";
-import { NewBlogProp } from "@/types";
-import { getEditBlogSchema, validateWithSchema } from "@/utils/blog";
+import { NewBlogProp } from "@/app/types";
+import { getEditBlogSchema, validateWithSchema } from "@/app/utils/blog";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import React, { useEffect, useRef, useState } from "react";

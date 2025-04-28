@@ -1,39 +1,57 @@
-import { useCallback, useEffect, useState } from "react";
-import { addUser, getMyInfo, loginUser } from "../../utils/user/userAPI";
+import { useRouter } from "next/navigation";
+import { useState, useCallback } from "react";
+import { useUserStoreActions } from "../store/user";
 import {
-  LoginFormProps,
+  RegisterErrorProps,
   RegisterFormProps,
   LoginErrorProps,
-  RegisterErrorProps,
+  LoginFormProps,
   MyInfoProps,
-} from "@/types";
-import { isLoginError, isRegisterError } from "@/utils/user";
+} from "../types";
+import { isRegisterError, isLoginError } from "../utils/user";
+import { addUser, loginUser, getMyInfo } from "../utils/user/userAPI";
+import { storeUserData } from "../utils";
 
 export const useAddUser = () => {
-  const [loading, setloading] = useState(true);
-  const [error, seterror] = useState<RegisterErrorProps | null>(null);
+  const setUser = useUserStoreActions();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<RegisterErrorProps | null>(null);
+
   const handleAddUser = async (data: RegisterFormProps) => {
     try {
-      await addUser(data);
+      setError(null);
+      const res = await addUser(data);
+      storeUserData(res.user);
+      setUser(res.user);
+      router.push("/blogs");
     } catch (error) {
       if (isRegisterError(error)) {
-        seterror(error);
+        setError(error);
       } else {
-        seterror({ message: "Registration failed" });
+        setError({ message: "Registration failed" });
       }
     } finally {
-      setloading(false);
+      setLoading(false);
     }
   };
+
   return { handleAddUser, loading, error };
 };
 
 export const useLoginUser = () => {
-  const [loading, setloading] = useState(true);
+  const setUser = useUserStoreActions();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<LoginErrorProps | null>(null);
+
   const handleLoginUser = async (data: LoginFormProps) => {
     try {
-      await loginUser(data);
+      setError(null);
+      const res = await loginUser(data);
+      storeUserData(res.user);
+      setUser(res.user);
+      router.push("/blogs");
     } catch (error) {
       if (isLoginError(error)) {
         setError(error);
@@ -41,29 +59,35 @@ export const useLoginUser = () => {
         setError({ message: "Login failed" });
       }
     } finally {
-      setloading(false);
+      setLoading(false);
     }
   };
+
   return { handleLoginUser, loading, error };
 };
 
 export const useGetMyInfo = () => {
+  const setUser = useUserStoreActions();
+  const router = useRouter();
   const [data, setData] = useState<MyInfoProps | null>(null);
-  const [loading, setloading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<LoginErrorProps | null>(null);
-  const haneGetMyInfo = useCallback(async () => {
+
+  const handleGetMyInfo = useCallback(async () => {
     try {
       setData(await getMyInfo());
     } catch (error) {
       if (isLoginError(error)) {
         setError(error);
+        router.push("/login");
       } else {
         setError({ message: "Login failed" });
+        router.push("/login");
       }
     } finally {
-      setloading(false);
+      setLoading(false);
     }
-  }, []);
+  }, [router]);
 
-  return { haneGetMyInfo, loading, error, data };
+  return { handleGetMyInfo, loading, error, data };
 };

@@ -1,8 +1,8 @@
-import { NewCommentProps } from "@/types";
+import { NewCommentProps } from "@/app/types";
 
 export const addComment = async (blogId: number, content: string) => {
   try {
-    const response = await fetch(`/api/comments/${blogId}`, {
+    const response = await fetch(`/api/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,7 +28,7 @@ export const addComment = async (blogId: number, content: string) => {
 
 export const getBlogComments = async (id: number) => {
   try {
-    const response = await fetch(`/api/comment/${id}`, {
+    const response = await fetch(`/api/comments/blog/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

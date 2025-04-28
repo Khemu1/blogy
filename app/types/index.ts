@@ -133,7 +133,6 @@ export type SearchParams = {
 
 export interface UserModel {
   id: number;
-  roleId: number;
   username: string;
   email: string;
   password: string;
@@ -160,18 +159,4 @@ export interface CommentModel {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
-}
-
-export interface RoleModel {
-  id: number;
-  name: ROLES;
-  createdAt: Date;
-  updatedAt: Date;
-}
-export interface UserRoleModel {
-  id: number;
-  userId: number;
-  roleId: number;
-  createdAt: Date;
-  updatedAt: Date;
 }

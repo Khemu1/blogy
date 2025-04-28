@@ -1,5 +1,5 @@
 import sequelize from "@/config/db";
-import { CommentModel } from "@/types";
+import { CommentModel } from "@/app/types";
 import { DataTypes, Model, Optional } from "sequelize";
 import Blog from "./Blog";
 

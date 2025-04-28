@@ -1,4 +1,4 @@
-import { LoginFormProps, RegisterFormProps } from "@/types";
+import { LoginFormProps, RegisterFormProps } from "@/app/types";
 
 export const loginUser = async (data: LoginFormProps) => {
   try {

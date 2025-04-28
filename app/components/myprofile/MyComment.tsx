@@ -1,4 +1,4 @@
-import { MyProfileComments } from "@/types";
+import { MyProfileComments } from "@/app/types";
 import Link from "next/link";
 import React from "react";
 

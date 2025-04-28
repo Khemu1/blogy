@@ -1,4 +1,4 @@
-import { LoginErrorProps, RegisterErrorProps } from "@/types";
+import { LoginErrorProps, RegisterErrorProps } from "@/app/types";
 import { object, string, ZodError, ZodIssueCode } from "zod";
 
 export const validateWithSchema = <T>(error: any) => {

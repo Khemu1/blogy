@@ -1,8 +1,12 @@
 // middleware.ts or middleware.js
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { registerSchema, validateWithSchema, loginSchema } from "@/utils/user";
-import { LoginFormProps, RegisterFormProps } from "@/types";
+import {
+  registerSchema,
+  validateWithSchema,
+  loginSchema,
+} from "@/app/utils/user";
+import { LoginFormProps, RegisterFormProps } from "@/app/types";
 
 export async function registerMiddleware(req: NextRequest) {
   try {

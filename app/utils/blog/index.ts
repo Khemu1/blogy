@@ -1,4 +1,4 @@
-import { BlogErrorProps } from "@/types";
+import { BlogErrorProps } from "@/app/types";
 import { object, string, ZodError } from "zod";
 
 export const validateWithSchema = <T>(error: any) => {

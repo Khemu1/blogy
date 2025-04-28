@@ -1,4 +1,4 @@
-import { MyInfoProps, UserProps } from "@/types";
+import { MyInfoProps, UserProps } from "@/app/types";
 import React from "react";
 
 const MyInfo: React.FC<{ data: UserProps }> = ({ data }) => {

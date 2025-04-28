@@ -6,15 +6,15 @@ import {
   deleteUserBlogs,
   getBlog,
   deleteBlog,
-} from "../../utils/blog/blogAPI";
+} from "../utils/blog/blogAPI";
 import {
   AllBlogProps,
   BlogErrorProps,
   BlogProps,
   EditBlogProp,
   NewBlogProp,
-} from "@/types";
-import { isBlogError } from "@/utils/blog";
+} from "@/app/types";
+import { isBlogError } from "@/app/utils/blog";
 import { useRouter } from "next/navigation";
 
 export const useGetBlogs = () => {

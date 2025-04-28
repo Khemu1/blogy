@@ -3,7 +3,7 @@ import Blog from "@/db/models/Blog";
 import Comment from "@/db/models/Comment";
 import User from "@/db/models/User";
 import { CustomError } from "@/middlewares/error/CustomError";
-import { NewBlogProp, SearchParams, updateBlogParams } from "@/types";
+import { NewBlogProp, SearchParams, updateBlogParams } from "@/app/types";
 import { NextRequest } from "next/server";
 import { Op } from "sequelize";
 
@@ -158,6 +158,7 @@ export const getBlogService = async (blogId: number, userId: number) => {
       include: [
         {
           model: Comment,
+
           include: [
             {
               model: User,
@@ -165,7 +166,7 @@ export const getBlogService = async (blogId: number, userId: number) => {
             },
           ],
           order: commentsOrder,
-          attributes: ["content"],
+          attributes: ["id", "content"],
         },
         {
           model: User,

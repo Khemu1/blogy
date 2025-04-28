@@ -15,7 +15,7 @@ const Blog: React.FC<Props> = ({ params: { id } }) => {
     if (!isNaN(Number(id))) {
       handleGetBlog(id);
     }
-  }, [id, handleGetBlog]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -31,7 +31,7 @@ const Blog: React.FC<Props> = ({ params: { id } }) => {
 
   return (
     <div className="flex flex-col gap-6  items-center my-4 px-3">
-      <BlogPage key={data.id} blogData={{ ...data }} comments={data.comments} />
+      <BlogPage blogData={{ ...data }} comments={data.comments} />
     </div>
   );
 };

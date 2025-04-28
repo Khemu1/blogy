@@ -3,15 +3,17 @@ import { useGetMyInfo } from "@/app/hooks/user";
 import { useEffect, useState } from "react";
 import { MyInfo, MyBlogs, MyComments } from "../components/index";
 import { notFound } from "next/navigation";
+import { useUserStore } from "../store/user";
 
 const Page = () => {
+  const user = useUserStore();
   const [selected, setSelected] = useState<"user_info" | "blogs" | "comments">(
     "user_info"
   );
-  const { loading, error, haneGetMyInfo, data } = useGetMyInfo();
+  const { loading, error, handleGetMyInfo, data } = useGetMyInfo();
   useEffect(() => {
-    haneGetMyInfo();
-  }, [haneGetMyInfo]);
+    handleGetMyInfo();
+  }, [user.id]);
 
   if (loading || !data) {
     return (
@@ -26,8 +28,7 @@ const Page = () => {
   console.log(data);
   return (
     <main className="mt-5 flex flex-col  gap-5 h-full px-4">
-      {/* Sidebar */}
-      <aside className="flex  items-center flex-shrink flex-grow-0 w-full ">
+      <header className="flex  items-center flex-shrink flex-grow-0 w-full ">
         <div className="flex w-full justify-around items-center  gap-1 rounded-xl">
           <button
             value="user_info"
@@ -61,9 +62,8 @@ const Page = () => {
             Comments
           </button>
         </div>
-      </aside>
+      </header>
 
-      {/* Main Content */}
       <section className="flex-shrink-0 flex flex-col gap-8 flex-grow bg-base-300 rounded-xl h-[90dvh] relative">
         <div className="flex flex-col justify-between p-4 h-full">
           {selected === "user_info" && (

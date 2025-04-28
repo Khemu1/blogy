@@ -3,9 +3,8 @@ import User from "@/db/models/User";
 import UserRole from "@/db/models/UserRole";
 import sequelize from "@/config/db";
 import { CustomError } from "@/middlewares/error/CustomError";
-import { LoginFormProps, RegisterFormProps } from "@/types";
+import { LoginFormProps, RegisterFormProps } from "@/app/types";
 import { Op } from "sequelize";
-import Role from "@/db/models/Role";
 import { sendEmail } from "@/app/api/email";
 
 const registerUserService = async (data: RegisterFormProps) => {
@@ -31,25 +30,7 @@ const registerUserService = async (data: RegisterFormProps) => {
       password: hashedPassword,
     };
 
-    const userRoleId = await Role.findOne({ where: { name: "user" } });
-    if (!userRoleId || isNaN(+userRoleId.id)) {
-      throw new CustomError(
-        "Role 'user' not found",
-        400,
-        "check the roles table",
-        true
-      );
-    }
-
-    const user = await User.create(
-      { ...userModifiedData, roleId: userRoleId.id },
-      { transaction }
-    );
-
-    await UserRole.create(
-      { userId: user.id, roleId: userRoleId.id },
-      { transaction }
-    );
+    const user = await User.create({ ...userModifiedData }, { transaction });
 
     await transaction.commit();
 
@@ -61,16 +42,14 @@ const registerUserService = async (data: RegisterFormProps) => {
       email,
       ...modifiedUser
     } = user.get();
-    const emailBody = `Hello, ${data.username} thank you for registering with us `;
-    const emailSubject = "Email created";
-    sendEmail(email, emailSubject, emailBody);
+    // const emailBody = `Hello, ${data.username} thank you for registering with us `;
+    // const emailSubject = "Email created";
+    // sendEmail(email, emailSubject, emailBody);
 
     return modifiedUser;
   } catch (error) {
     await transaction.rollback();
-
     console.error("Error in registerUserService:", error);
-
     throw error;
   }
 };

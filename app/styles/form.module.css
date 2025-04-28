@@ -1,9 +1,9 @@
 .inputContainer {
-  @apply flex justify-between gap-5 items-center;
+  @apply flex flex-col justify-between gap-5;
 }
 
 .error {
-  @apply mt-2  flex justify-center text-red-600 text-[12px] w-[195px] font-semibold text-center;
+  @apply mt-2  flex  text-red-600 text-[12px] w-[195px] font-semibold;
 }
 .login_error {
   @apply w-full flex justify-center text-red-600  font-extrabold text-center;
@@ -12,7 +12,6 @@
   border-bottom-color: red;
   transition: all ease-in-out 250ms;
 }
-
 
 .markdownPreview {
   line-height: 1.6;

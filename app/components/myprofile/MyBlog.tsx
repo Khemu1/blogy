@@ -1,4 +1,4 @@
-import { MyProfileBlogs } from "@/types";
+import { MyProfileBlogs } from "@/app/types";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import Link from "next/link";

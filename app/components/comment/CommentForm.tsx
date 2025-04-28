@@ -1,12 +1,15 @@
 "use client";
-import { useAddComment, useGetBlogComments } from "../../hooks/comment";
-import { getCommentSchema, validateWithSchema } from "@/utils/comment";
+import { useAddComment } from "../../hooks/comment";
+import { getCommentSchema, validateWithSchema } from "@/app/utils/comment";
 import { useEffect, useRef, useState } from "react";
 import { ZodError } from "zod";
 import styles from "../../styles/form.module.css";
 import Image from "next/image";
 
-const CommentForm: React.FC<{ blogId: number }> = ({ blogId }) => {
+const CommentForm: React.FC<{
+  blogId: number;
+  refetchComments: (blogId: number) => Promise<void>;
+}> = ({ blogId, refetchComments }) => {
   const [data, setData] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
   const {
@@ -17,7 +20,6 @@ const CommentForm: React.FC<{ blogId: number }> = ({ blogId }) => {
   } = useAddComment();
   const schema = getCommentSchema();
   const newCommentRef = useRef<HTMLTextAreaElement>(null);
-  const {} = useGetBlogComments();
   const HandleSubmit = async (
     blogId: number,
     content: string,
@@ -27,15 +29,15 @@ const CommentForm: React.FC<{ blogId: number }> = ({ blogId }) => {
     try {
       setErrors(null);
       schema.parse({ content });
-      await handleAddComment(blogId, content); // Ensure this is awaited if it returns a promise
+      await handleAddComment(blogId, content);
     } catch (error) {
       if (error instanceof ZodError) {
         const validationErrors = validateWithSchema(error);
         setErrors(validationErrors);
-        console.log(validationErrors); // Log the validation errors after updating state
+        console.log(validationErrors);
       } else {
         setErrors({ content: "Error parsing comment" });
-        console.log("Error parsing comment", error); // Log other errors
+        console.log("Error parsing comment", error);
       }
     }
   };
@@ -43,11 +45,17 @@ const CommentForm: React.FC<{ blogId: number }> = ({ blogId }) => {
   useEffect(() => {
     const textarea = newCommentRef.current;
     if (textarea) {
-      textarea.style.height = "auto"; // Reset height to auto
-      textarea.style.height = `${textarea.scrollHeight}px`; // Set height to match content
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
     }
   }, [data]);
 
+  useEffect(() => {
+    if (success) {
+      setData("");
+      refetchComments(blogId);
+    }
+  }, [success, blogId]);
   return (
     <div>
       <form onSubmit={(e: React.FormEvent) => HandleSubmit(blogId, data, e)}>

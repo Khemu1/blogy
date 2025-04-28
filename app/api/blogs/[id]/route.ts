@@ -1,3 +1,4 @@
+import { updateBlogParams } from "@/app/types";
 import { initializeDatabase } from "@/config/dbInit";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
 import {
@@ -5,7 +6,6 @@ import {
   getBlogService,
   updateBlogService,
 } from "@/services/blogServices";
-import { updateBlogParams } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 interface Props {
   params: { id: number };

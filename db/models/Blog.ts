@@ -1,8 +1,8 @@
 import sequelize from "@/config/db";
-import { BlogModel } from "@/types";
 import { DataTypes, Model, Optional } from "sequelize";
 import Comment from "./Comment";
 import User from "./User";
+import { BlogModel } from "@/app/types";
 
 interface BlogCreationAttributes
   extends Optional<BlogModel, "id" | "createdAt" | "updatedAt" | "deletedAt"> {}

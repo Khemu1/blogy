@@ -1,5 +1,5 @@
 "user client";
-import { MyProfileBlogs } from "@/types";
+import { MyProfileBlogs } from "@/app/types";
 import MyBlog from "./MyBlog";
 import { useState } from "react";
 import { useDeleteBlog } from "@/app/hooks/blog";

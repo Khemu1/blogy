@@ -1,15 +1,18 @@
 "use client";
 import { useAddBlog } from "@/app/hooks/blog";
-import { NewBlogProp } from "@/types";
+import { NewBlogProp } from "@/app/types";
 import { useState, useEffect, useRef } from "react";
-import { getNewBlogSchema, validateWithSchema } from "@/utils/blog";
+import { getNewBlogSchema, validateWithSchema } from "@/app/utils/blog";
 import { ZodError } from "zod";
 import styles from "../../styles/form.module.css";
 import Image from "next/image";
 import { marked } from "marked";
-import DOMPurify from "dompurify";
+import { useUserStore } from "@/app/store/user";
+import { useRouter } from "next/navigation";
 
 const NewBlog = () => {
+  const userStore = useUserStore();
+  const routeTo = useRouter();
   const [data, setData] = useState<NewBlogProp>({
     title: "",
     content: "",
@@ -49,15 +52,14 @@ const NewBlog = () => {
     // Convert and sanitize content
     const convertAndSanitizeMarkdown = async () => {
       const rawHtml = await marked(data.content);
-      const sanitizedHtml = DOMPurify.sanitize(rawHtml);
-      setSanitizedContent(sanitizedHtml);
+      // Remove DOMPurify sanitization here
+      setSanitizedContent(rawHtml); // Use rawHtml directly
     };
 
-    // Convert and sanitize title (if using Markdown)
     const convertAndSanitizeMarkdownForTitle = async () => {
       const rawHtml = await marked(data.title); // Only if you want Markdown in titles
-      const sanitizedHtml = DOMPurify.sanitize(rawHtml);
-      setSanitizedTitle(sanitizedHtml);
+      // Remove DOMPurify sanitization here
+      setSanitizedTitle(rawHtml); // Use rawHtml directly
     };
     convertAndSanitizeMarkdown();
     convertAndSanitizeMarkdownForTitle();
@@ -67,32 +69,37 @@ const NewBlog = () => {
     const updatePreviewWindow = () => {
       if (previewWindow && !previewWindow.closed) {
         previewWindow.document.body.innerHTML = `
-      <html>
-        <head>
-          <title>${sanitizedTitle || "Title"}</title>
-          <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        </head>
-          <style>
-          .preview_title > * {
-              text-overflow: ellipsis;
-              overflow: hidden !important;
-              white-space: nowrap;
-              width: 100%;
-              max-width: 100%;
-          }
-          </style>
-        <body>
-          <div class="text-white p-4">
-            <h1 class="preview_title text-3xl font-bold mb-4 text-center max-w-full truncate whitespace-nowrap text-ec overflow-hidden">${
-              sanitizedTitle || "Your title will appear here"
-            }</h1>
-            <div class="prose prose-lg break-words max-w-full">${
-              sanitizedContent || "Your content will appear here"
-            }</div>
-          </div>
-        </body>
-      </html>
-    `;
+        <html>
+          <head>
+            <title>${sanitizedTitle || "Title"}</title>
+            <link href="/app/globals.css" rel="stylesheet">
+            <style>
+              /* Ensure text is white and background is dark */
+              body {
+                background-color: #1f2937; /* Tailwind's bg-gray-900 */
+                color: white; /* Make text white */
+              }
+              .preview_title > * {
+                text-overflow: ellipsis;
+                overflow: hidden !important;
+                white-space: nowrap;
+                width: 100%;
+                max-width: 100%;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="text-white p-4">
+              <h1 class="preview_title text-3xl font-bold mb-4 text-center max-w-full truncate whitespace-nowrap text-ec overflow-hidden">
+                ${sanitizedTitle || "Your title will appear here"}
+              </h1>
+              <div class="prose prose-lg break-words max-w-full">
+                ${sanitizedContent || "Your content will appear here"}
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
       }
     };
     updatePreviewWindow();
@@ -108,6 +115,11 @@ const NewBlog = () => {
     }
   }, [data.content]);
 
+  useEffect(() => {
+    if (userStore.id < 1) {
+      routeTo.push("/blogs");
+    }
+  }, [userStore.id]);
   return (
     <div className="flex flex-col justify-center gap-6 items-center w-full p-4 ">
       <div className="flex  flex-col gap-3 ">

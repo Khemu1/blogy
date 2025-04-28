@@ -5,6 +5,7 @@ import { CustomError } from "@/middlewares/error/CustomError";
 
 const getMyData = async (userId: number) => {
   try {
+    console.log("userId", userId);
     if (isNaN(userId) || userId < 1) {
       throw new CustomError("invalid user id", 401, "try to login again", true);
     }

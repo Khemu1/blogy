@@ -1,5 +1,5 @@
 import { CustomError } from "@/middlewares/error/CustomError";
-import { JWTPayloadProps } from "@/types";
+import { JWTPayloadProps } from "@/app/types";
 import { jwtVerify, SignJWT } from "jose"; // will be using jose for validation since runtime edge doesn't support all modules in jsonwebtoken
 export const refreshCookieOptions = {
   maxAge: 604800, // 7 days in seconds

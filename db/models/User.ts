@@ -1,10 +1,7 @@
 import bcrypt from "bcrypt";
 import sequelize from "@/config/db";
-import { UserModel } from "@/types";
 import { DataTypes, Model, Optional } from "sequelize";
-import Blog from "./Blog";
 import Comment from "./Comment";
-import Role from "./Role";
 
 interface UserCreationAttributes
   extends Optional<UserModel, "id" | "createdAt" | "updatedAt" | "deletedAt"> {}
@@ -14,7 +11,6 @@ class User
   implements UserModel
 {
   declare readonly id: number;
-  declare readonly roleId: number;
   declare readonly username: string;
   declare readonly email: string;
   declare readonly password: string;
@@ -26,11 +22,9 @@ class User
     return bcrypt.hashSync(password, 10);
   }
 
-  // Associations
   static associate() {
     User.hasMany(Comment, { foreignKey: "userId" });
     Comment.belongsTo(User, { foreignKey: "userId" });
-    User.belongsTo(Role, { foreignKey: "roleId" });
   }
 }
 
@@ -41,16 +35,7 @@ User.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    roleId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "roles",
-        key: "id",
-      },
-      allowNull: false,
-      onDelete: "CASCADE",
-      onUpdate: "CASCADE",
-    },
+
     username: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -108,8 +93,18 @@ User.init(
     freezeTableName: true,
     timestamps: true,
     modelName: "user",
-    paranoid: true,
+    paranoid: true, // This ensures soft deletes
   }
 );
 
 export default User;
+
+export interface UserModel {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}

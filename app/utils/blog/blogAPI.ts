@@ -1,4 +1,4 @@
-import { BlogErrorProps, EditBlogProp, NewBlogProp } from "@/types";
+import { BlogErrorProps, EditBlogProp, NewBlogProp } from "@/app/types";
 
 export const getUserBlogs = async (id: number) => {
   try {
@@ -126,7 +126,7 @@ export const editBlog = async (id: number, data: EditBlogProp) => {
   }
 };
 
-export const deleteBlog = async (blogId: number,) => {
+export const deleteBlog = async (blogId: number) => {
   try {
     const response = await fetch(`/api/blogs/${blogId}`, {
       method: "Delete",

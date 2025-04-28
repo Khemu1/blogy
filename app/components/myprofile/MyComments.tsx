@@ -1,4 +1,4 @@
-import { MyProfileComments } from "@/types";
+import { MyProfileComments } from "@/app/types";
 import React, { useState } from "react";
 import MyComment from "./MyComment";
 import { useDeleteComment } from "@/app/hooks/comment";

@@ -1,9 +1,9 @@
 "use client";
-import { AllBlogProps } from "@/types";
+import { AllBlogProps } from "@/app/types";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import { useEffect, useState } from "react";
-import "../../styles/blogCard.css"; // Import the CSS module
+import "../../styles/blogCard.css";
 import Link from "next/link";
 
 const BlogCard: React.FC<{ cardData: AllBlogProps }> = ({ cardData }) => {
@@ -16,13 +16,7 @@ const BlogCard: React.FC<{ cardData: AllBlogProps }> = ({ cardData }) => {
       const sanitizedHtml = DOMPurify.sanitize(rawHtml);
       setSanitizedTitle(sanitizedHtml);
     };
-    const convertAndSanitizeMarkdownForContent = async () => {
-      const rawHtml = await marked(cardData.content);
-      const sanitizedHtml = DOMPurify.sanitize(rawHtml);
-      setSanitizedContent(sanitizedHtml);
-    };
     convertAndSanitizeMarkdownForTitle();
-    convertAndSanitizeMarkdownForContent();
   }, [cardData.title, cardData.content]);
 
   return (

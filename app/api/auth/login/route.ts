@@ -1,5 +1,4 @@
 import { initializeDatabase } from "@/config/dbInit";
-import { LoginFormProps } from "@/types";
 import { NextResponse, NextRequest } from "next/server";
 import {
   accessCookieOptions,
@@ -8,6 +7,7 @@ import {
 } from "@/services/auth";
 import { loginUserService } from "@/services/authServices";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
+import { LoginFormProps } from "@/app/types";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +17,10 @@ export async function POST(req: NextRequest) {
     const { accessToken, refreshToken } = await createTokens(user.id);
 
     const response = NextResponse.json(
-      { message: "Logged in successfully", username: user.username },
+      {
+        message: "Logged in successfully",
+        user: { username: user.username, id: user.id },
+      },
       { status: 200 }
     );
     response.cookies.set("accessToken", accessToken, accessCookieOptions);

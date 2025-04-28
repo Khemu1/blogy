@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getCommentSchema, validateWithSchema } from "@/utils/comment";
+import { getCommentSchema, validateWithSchema } from "@/app/utils/comment";
 import { ZodError } from "zod";
 import { errorHandler } from "../error/ErrorHandler";
 
