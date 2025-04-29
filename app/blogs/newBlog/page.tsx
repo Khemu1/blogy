@@ -9,6 +9,7 @@ import Image from "next/image";
 import { marked } from "marked";
 import { useUserStore } from "@/app/store/user";
 import { useRouter } from "next/navigation";
+import FileUploader from "@/app/components/blog/FileUploader";
 
 const NewBlog = () => {
   const userStore = useUserStore();
@@ -116,9 +117,13 @@ const NewBlog = () => {
   }, [data.content]);
 
   useEffect(() => {
-    if (userStore.id < 1) {
-      routeTo.push("/blogs");
-    }
+    let timeOut: NodeJS.Timeout;
+    timeOut = setTimeout(() => {
+      if (userStore.id < 1) {
+        routeTo.push("/blogs");
+      }
+    }, 100);
+    return () => clearTimeout(timeOut);
   }, [userStore.id]);
   return (
     <div className="flex flex-col justify-center gap-6 items-center w-full p-4 ">
@@ -149,6 +154,7 @@ const NewBlog = () => {
             }
             className="p-3 rounded-md focus:outline-none"
           />
+          <FileUploader />
         </div>
         {(errors?.title || APIerror?.title) && (
           <p className={styles.error}>{errors?.title ?? APIerror?.title}</p>

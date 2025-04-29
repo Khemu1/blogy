@@ -59,7 +59,7 @@ const Pagination: React.FC<PagProps> = ({
         {pageNumbers.map((page, index) => (
           <button
             key={page}
-            className={`w-[48px] h-[48px] ${
+            className={`w-[48px] h-[48px] !rounded-md ${
               currentPage === page
                 ? "bg-base-300"
                 : "bg-base-200 hover:bg-base-300"

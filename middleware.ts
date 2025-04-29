@@ -55,6 +55,13 @@ export async function middleware(req: NextRequest) {
       console.log("yesssss my info");
       return await validateUser(req);
     }
+    if (pathname.startsWith("/api/upload")) {
+      // Handle upload process
+      const userValidationResponse = await validateUser(req);
+      if (!userValidationResponse.ok) return userValidationResponse;
+      return userValidationResponse;
+    }
+
     return NextResponse.next();
   } catch (error) {
     console.log("error from root middleware", error);
@@ -68,5 +75,6 @@ export const config = {
     "/api/blogs/:path*",
     "/api/comments/:path*",
     "/api/users/myInfo",
+    "/api/upload/process",
   ],
 };

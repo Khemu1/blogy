@@ -6,7 +6,7 @@ import User from "./User";
 interface UploadCreationAttributes
   extends Optional<
     UploadModel,
-    "createdAt" | "updatedAt" | "deletedAt" | "isCanceled" | "isCompleted"
+    "createdAt" | "updatedAt" | "isCanceled" | "isCompleted"
   > {}
 
 class Upload
@@ -84,16 +84,11 @@ Upload.init(
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
-    deletedAt: {
-      type: DataTypes.DATE,
-      allowNull: true, // <--- Important
-    },
   },
   {
     sequelize,
     freezeTableName: true,
     timestamps: true,
-    paranoid: true, // paranoid=true = Sequelize will handle deletedAt automatically
     modelName: "upload", // <-- You wrote "user" here by mistake!
   }
 );
@@ -108,7 +103,6 @@ export interface UploadModel {
   mimeType: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
   isCompleted: boolean;
   isCanceled: boolean;
 }

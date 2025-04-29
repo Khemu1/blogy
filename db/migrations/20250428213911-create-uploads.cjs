@@ -19,7 +19,7 @@ module.exports = {
         allowNull: false,
       },
       mimeType: {
-        type: Sequelize.BOOLEAN,
+        type: Sequelize.STRING,
         allowNull: false,
         defaultValue: false,
       },
@@ -33,7 +33,7 @@ module.exports = {
         allowNull: false,
         defaultValue: false,
       },
-      user_id: {
+      userId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {

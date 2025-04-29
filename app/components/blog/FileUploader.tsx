@@ -26,11 +26,7 @@ registerPlugin(
   FilePondPluginFileChunking
 );
 
-type FileUploaderProps = {
-  serverUrl: string; // Where to send uploaded chunks
-};
-
-const FileUploader = ({ serverUrl }: FileUploaderProps) => {
+const FileUploader = () => {
   const [files, setFiles] = useState<any[]>([]);
 
   return (
@@ -41,12 +37,31 @@ const FileUploader = ({ serverUrl }: FileUploaderProps) => {
         allowMultiple={false}
         maxFiles={1}
         chunkUploads
-        chunkSize={500_000} // 500 KB per chunk (adjust as needed)
-        chunkRetryDelays={[500, 1000, 3000]} // Retry upload if fails
+        // chunkSize={80 * 1024 * 1024} // 80 MB
+        chunkSize={500_000}
+        chunkRetryDelays={[500, 1000, 3000]}
         server={{
-          url: serverUrl,
-          process: "/process", // endpoint that handles chunks
-          revert: "/revert", // endpoint that can cancel
+          url: "/api/upload",
+          process: {
+            url: "/process",
+            method: "POST",
+            withCredentials: true,
+
+            ondata: (formData) => {
+              const file = files[0]?.file;
+              if (file) {
+                formData.append(
+                  "metadata",
+                  JSON.stringify({
+                    name: file.name,
+                    type: file.type,
+                  })
+                );
+              }
+              return formData;
+            },
+          },
+          revert: "/revert",
         }}
         name="file"
         labelIdle='Drag & Drop your file or <span class="filepond--label-action">Browse</span>'
