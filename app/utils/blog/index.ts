@@ -1,18 +1,6 @@
 import { BlogErrorProps } from "@/app/types";
 import { object, string, ZodError } from "zod";
 
-export const validateWithSchema = <T>(error: any) => {
-  if (error instanceof ZodError) {
-    const errors = error.errors.reduce((acc: Record<string, string>, curr) => {
-      acc[curr.path.join(".")] = curr.message;
-      return acc;
-    }, {});
-    return errors; // Return the errors object
-  }
-
-  return null; // Return null if the error is not a ZodError
-};
-
 export const getNewBlogSchema = () => {
   return object({
     title: string({
@@ -26,11 +14,8 @@ export const getNewBlogSchema = () => {
         message: "Blog content is required",
       }
     ),
+    imageId: string().min(1, "Image is required").nullable(),
   });
-  /**
-   * The refine method should validate that the field has content
-   * rather than being empty. The condition inside the refine should check for a non-empty string.
-   */
 };
 
 export const getEditBlogSchema = (title: string, content: string) => {
@@ -56,10 +41,6 @@ export const getEditBlogSchema = (title: string, content: string) => {
       path: ["titleOrContent"],
     }
   );
-  /**
-   * The refine method should validate that the field has content
-   * rather than being empty. The condition inside the refine should check for a non-empty string.
-   */
 };
 
 export function isBlogError(error: any): error is BlogErrorProps {

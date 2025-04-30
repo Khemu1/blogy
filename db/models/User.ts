@@ -93,7 +93,6 @@ User.init(
     freezeTableName: true,
     timestamps: true,
     modelName: "user",
-    paranoid: true, // This ensures soft deletes
   }
 );
 

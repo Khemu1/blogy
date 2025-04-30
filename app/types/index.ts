@@ -1,3 +1,5 @@
+import Upload from "@/db/models/Upload";
+
 export enum ROLES {
   ADMIN = "admin",
   USER = "user",
@@ -38,6 +40,7 @@ export interface UserProps {
 export interface NewBlogProp {
   title: string;
   content: string;
+  imageId: string | null;
 }
 export interface EditBlogProp {
   title?: string;
@@ -49,6 +52,7 @@ export interface BlogProps {
   userId: number;
   title: string;
   content: string;
+  image: Upload | null;
   createdAt: Date;
   updatedAt: Date;
   user: { username: string };
@@ -70,9 +74,10 @@ export interface AllBlogProps {
   userId: number;
   title: string;
   content: string;
+  image: Upload | null;
   author: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   user: { username: string };
 }
 

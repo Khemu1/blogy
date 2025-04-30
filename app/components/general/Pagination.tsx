@@ -46,7 +46,7 @@ const Pagination: React.FC<PagProps> = ({
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="pagination flex items-center">
+    <div className="pagination !relative flex items-center">
       <button
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
@@ -59,7 +59,7 @@ const Pagination: React.FC<PagProps> = ({
         {pageNumbers.map((page, index) => (
           <button
             key={page}
-            className={`w-[48px] h-[48px] !rounded-md ${
+            className={`w-[48px] h-[48px] !rounded-md mx-1 ${
               currentPage === page
                 ? "bg-base-300"
                 : "bg-base-200 hover:bg-base-300"

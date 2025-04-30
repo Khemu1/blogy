@@ -121,7 +121,9 @@ const Nav = () => {
               >
                 <FaUserCircle size={24} />
                 {userStore.id > 0 && (
-                  <span className="text-sm">{userStore.username}</span>
+                  <span className="text-sm max-w-[75px] truncate">
+                    {userStore.username}
+                  </span>
                 )}
               </button>
             </div>

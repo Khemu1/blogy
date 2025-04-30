@@ -1,45 +1,58 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 class CustomError extends Error {
-  message: string;
   statusCode: number;
   status: string;
+  safe: boolean;
+  type: string;
   details?: string;
-  trusted?: boolean = false;
+  errors: Record<string, string> = {};
+
   constructor(
     message: string,
-    statusCode: number,
+    statusCode: number = 500,
+    type: string = "server error",
+    safe: boolean = false,
     details?: string,
-    trusted?: boolean
+    errors?: Record<string, string>
   ) {
     super(message);
-    this.message = message;
-    this.statusCode = statusCode;
-    this.status = statusCode >= 400 && statusCode < 500 ? "fail" : "error";
-    this.details = details;
-    this.trusted = trusted;
+    this.name = "CustomError"; // inhereted from the Error Class
     Object.setPrototypeOf(this, CustomError.prototype);
-
     Error.captureStackTrace(this, this.constructor);
+
+    this.statusCode = statusCode;
+    this.status = statusCode >= 200 && statusCode < 300 ? "success" : "fail";
+    this.safe = safe;
+    this.details = details;
+    this.type = type;
+    this.errors = errors ?? {};
   }
 }
 
-const sendDevError = (error: CustomError, req: NextRequest) => {
-  const { statusCode = 500, status = "error", message, stack, details } = error;
+const sendDevError = (error: CustomError) => {
+  const { statusCode, status, message, stack, type, details, errors } = error;
   return NextResponse.json(
-    { message, status, details, stack },
+    { message, status, details, stack, type, errors },
     { status: statusCode }
   );
 };
 
-const sendProdError = (error: CustomError, req: NextRequest) => {
-  const { statusCode = 500, status = "error", message, trusted } = error;
-  return trusted
-    ? NextResponse.json({ message, status }, { status: statusCode })
-    : NextResponse.json(
-        { message: "Something went wrong", status: "error" },
-        { status: 500 }
-      );
+const sendProdError = (error: CustomError) => {
+  const { statusCode, status, message, safe, type, details, errors } = error;
+
+  if (safe) {
+    return NextResponse.json(
+      { message, status, type, details, errors },
+      {
+        status: statusCode,
+      }
+    );
+  }
+  return NextResponse.json(
+    { message: "Something went wrong", status: "error", type, errors },
+    { status: 500 }
+  );
 };
 
 export { sendDevError, sendProdError, CustomError };

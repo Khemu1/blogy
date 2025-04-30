@@ -2,6 +2,7 @@ import { NewBlogProp } from "@/app/types";
 import { sanitizeRequestBody } from "@/app/utils";
 import { initializeDatabase } from "@/config/dbInit";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
+import { doesUserExist } from "@/services/authServices";
 import {
   addBlogService,
   getAllBlogsService,
@@ -11,8 +12,9 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
   try {
-    const sentizedData = (await sanitizeRequestBody(req)) as NewBlogProp;
     const userId = req.headers.get("X-User-Id") as string;
+    await doesUserExist(+userId);
+    const sentizedData = (await sanitizeRequestBody(req)) as NewBlogProp;
     await initializeDatabase();
     const blogId = await addBlogService(sentizedData, +userId);
     return NextResponse.json({ blogId }, { status: 201 });

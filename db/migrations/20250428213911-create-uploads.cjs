@@ -1,4 +1,5 @@
 "use strict";
+
 const { DataTypes } = require("sequelize");
 
 /** @type {import('sequelize-cli').Migration} */
@@ -38,6 +39,16 @@ module.exports = {
         allowNull: false,
         references: {
           model: "user",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      blogId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: "blog",
           key: "id",
         },
         onUpdate: "CASCADE",

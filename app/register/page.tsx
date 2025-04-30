@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import styles from "../styles/form.module.css";
-import { registerSchema, validateWithSchema } from "@/app/utils/user";
+import { registerSchema } from "@/app/utils/user";
 import { RegisterFormProps } from "@/app/types";
 import { ZodError } from "zod";
 import { useAddUser } from "@/app/hooks/user";
 import Link from "next/link"; // Import Link component from Next.js
+import { validateWithSchema } from "../utils/comment";
 
 const Register = () => {
   const schema = registerSchema();

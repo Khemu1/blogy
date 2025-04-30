@@ -4,31 +4,25 @@ import { DataTypes, Model, Optional } from "sequelize";
 import Upload from "./Upload";
 
 export interface UploadChunkModel {
-  id: string;
+  id: number;
   upload_id: string;
-  chunk_index: number;
   chunk_length: number;
   offset: number;
   created_at: Date;
 }
 
 interface UploadChunkCreationAttributes
-  extends Optional<UploadChunkModel, "created_at"> {}
+  extends Optional<UploadChunkModel, "created_at" | "id"> {}
 
 class UploadChunk
   extends Model<UploadChunkModel, UploadChunkCreationAttributes>
   implements UploadChunkModel
 {
-  declare readonly id: string;
+  declare readonly id: number;
   declare readonly upload_id: string;
-  declare readonly chunk_index: number;
   declare readonly chunk_length: number;
   declare readonly offset: number;
   declare created_at: Date;
-
-  public static hashPassword(password: string): string {
-    return bcrypt.hashSync(password, 10);
-  }
 
   static associate() {
     UploadChunk.belongsTo(Upload, { foreignKey: "upload_id" });
@@ -38,9 +32,9 @@ class UploadChunk
 UploadChunk.init(
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       primaryKey: true,
-      allowNull: false,
+      autoIncrement: true,
     },
     upload_id: {
       type: DataTypes.STRING,
@@ -52,10 +46,7 @@ UploadChunk.init(
       onUpdate: "CASCADE",
       onDelete: "CASCADE",
     },
-    chunk_index: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
+
     chunk_length: {
       type: DataTypes.BIGINT,
       allowNull: false,
@@ -74,8 +65,9 @@ UploadChunk.init(
     sequelize,
     freezeTableName: true,
     modelName: "upload_chunk",
-    timestamps: true,
-    createdAt: "created_at",
+    tableName: "upload-chunk",
+    timestamps: false, // allow those if you have createdAt and updatedAt  in your model
+    createdAt: "created_at", // explicitly map createdAt to created_at
   }
 );
 

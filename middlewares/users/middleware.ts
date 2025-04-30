@@ -1,12 +1,10 @@
-// middleware.ts or middleware.js
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import {
-  registerSchema,
-  validateWithSchema,
-  loginSchema,
-} from "@/app/utils/user";
+import { registerSchema, loginSchema } from "@/app/utils/user";
 import { LoginFormProps, RegisterFormProps } from "@/app/types";
+import { ZodError } from "zod";
+import { CustomError } from "../error/CustomError";
+import { validateWithSchema } from "@/app/utils/comment";
 
 export async function registerMiddleware(req: NextRequest) {
   try {
@@ -15,15 +13,18 @@ export async function registerMiddleware(req: NextRequest) {
     await schema.parseAsync(data);
     return NextResponse.next();
   } catch (error) {
-    const validationErrors = validateWithSchema(error);
-    console.error(validationErrors);
-    return NextResponse.json(
-      {
-        message: "Validation failed",
-        errors: validationErrors,
-      },
-      { status: 400 }
-    );
+    if (error instanceof ZodError) {
+      const validationErrors = validateWithSchema(error);
+      throw new CustomError(
+        "Invalid Register Data",
+        400,
+        "",
+        true,
+        "",
+        validationErrors
+      );
+    }
+    throw error;
   }
 }
 
@@ -34,13 +35,17 @@ export async function loginMiddleware(req: NextRequest) {
     await schema.parseAsync(data);
     return NextResponse.next();
   } catch (error) {
-    const validationErrors = validateWithSchema(error);
-    console.error(validationErrors);
-    return NextResponse.json(
-      {
-        errors: validationErrors,
-      },
-      { status: 400 }
-    );
+    if (error instanceof ZodError) {
+      const validationErrors = validateWithSchema(error);
+      throw new CustomError(
+        "Invalid Login Data",
+        400,
+        "",
+        true,
+        "",
+        validationErrors
+      );
+    }
+    throw error;
   }
 }

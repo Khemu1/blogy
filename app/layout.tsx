@@ -18,10 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={""}>
         <Wrapper>
           <Nav />
-          <main className="flex flex-col gap-3 h-full">{children}</main>
+          {children}
         </Wrapper>
       </body>
     </html>

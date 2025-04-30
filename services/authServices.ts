@@ -1,11 +1,9 @@
 import bcrypt from "bcrypt";
 import User from "@/db/models/User";
-import UserRole from "@/db/models/UserRole";
 import sequelize from "@/config/db";
 import { CustomError } from "@/middlewares/error/CustomError";
 import { LoginFormProps, RegisterFormProps } from "@/app/types";
 import { Op } from "sequelize";
-import { sendEmail } from "@/app/api/email";
 
 const registerUserService = async (data: RegisterFormProps) => {
   const transaction = await sequelize.transaction();
@@ -82,4 +80,18 @@ const loginUserService = async (data: LoginFormProps) => {
   }
 };
 
-export { registerUserService, loginUserService };
+const doesUserExist = async (id: number) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        id: id,
+      },
+    });
+    if (user) return user;
+    throw new CustomError("User not found", 403);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { registerUserService, loginUserService, doesUserExist };

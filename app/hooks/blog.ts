@@ -16,6 +16,7 @@ import {
 } from "@/app/types";
 import { isBlogError } from "@/app/utils/blog";
 import { useRouter } from "next/navigation";
+import { CustomError } from "@/middlewares/error/CustomError";
 
 export const useGetBlogs = () => {
   const [loading, setLoading] = useState(false);
@@ -44,10 +45,12 @@ export const useGetBlogs = () => {
         const fetchedBlogs = await getBlogs(url);
         setData(fetchedBlogs);
       } catch (error) {
-        if (isBlogError(error)) {
-          setError(error);
+        if (error instanceof CustomError) {
+          setError(error.errors);
         } else {
-          setError({ message: "No Blogs Found" });
+          setError({
+            message: "An unknown error occurred while fetching blogs",
+          });
         }
       } finally {
         setLoading(false);
@@ -62,24 +65,24 @@ export const useGetBlogs = () => {
 export const useGetBlog = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<BlogProps | null>(null);
-  const [error, setError] = useState<BlogErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
 
-  const handleGetBlog = useCallback(async (id: number) => {
+  const handleGetBlog = async (id: number) => {
     setLoading(true);
     try {
       const blogData = await getBlog(id);
       setData(blogData);
       setError(null);
     } catch (error) {
-      if (isBlogError(error)) {
-        setError(error);
+      if (error instanceof CustomError) {
+        setError(error.errors);
       } else {
-        setError({ message: "Blog Not Found" });
+        setError({ message: "An unknown error occurred while fetching blog" });
       }
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   return { handleGetBlog, loading, error, data };
 };
@@ -89,29 +92,32 @@ export const useAddBlog = () => {
   const [blogId, setBlogId] = useState<{ blogId: number } | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setloading] = useState(false);
-  const [error, setError] = useState<BlogErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
   const handleAddBlog = async (data: NewBlogProp) => {
     try {
       setloading(true);
       setBlogId((await addBlog(data)) as { blogId: number });
       setSuccess(true);
     } catch (error) {
-      if (isBlogError(error)) {
-        setError(error);
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          routeTo.push("/login");
+        }
+        setError(error.errors);
       } else {
-        setError({ message: "Adding failed" });
+        setError({ message: "An unknown error occurred while adding blog" });
       }
     } finally {
       setloading(false);
     }
   };
   useEffect(() => {
-    if (success) {
-      setTimeout(() => {
-        setSuccess(false);
-        routeTo.push(`/blogs/${blogId?.blogId}`);
-      }, 2000);
-    }
+    // if (success) {
+    //   setTimeout(() => {
+    //     setSuccess(false);
+    //     routeTo.push(`/blogs/${blogId?.blogId}`);
+    //   }, 2000);
+    // }
     if (error) {
       setTimeout(() => {
         setError(null);
@@ -122,19 +128,25 @@ export const useAddBlog = () => {
 };
 
 export const useEditBlog = () => {
+  const routeTo = useRouter();
   const [loading, setloading] = useState(false);
   const [success, setSuccess] = useState(true);
-  const [error, setError] = useState<BlogErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
   const handleEditBlog = async (id: number, data: EditBlogProp) => {
     try {
       setloading(true);
       await editBlog(id, data);
       setSuccess(true);
     } catch (error) {
-      if (isBlogError(error)) {
-        setError(error);
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          routeTo.push("/login");
+        }
+        setError(error.errors);
       } else {
-        setError({ message: "Edit failed" });
+        setError({
+          message: "An unknown error occurred while adding blog",
+        });
       }
     } finally {
       setloading(false);
@@ -144,18 +156,24 @@ export const useEditBlog = () => {
 };
 
 export const useDeleteBlog = () => {
+  const routeTo = useRouter();
   const [loading, setloading] = useState(false);
-  const [error, setError] = useState<BlogErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
 
   const handleDeleteBlog = async (blogId: number) => {
     try {
       setloading(true);
       await deleteBlog(blogId);
     } catch (error) {
-      if (isBlogError(error)) {
-        setError(error);
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          routeTo.push("/login");
+        }
+        setError(error.errors);
       } else {
-        setError({ message: "Delete failed" });
+        setError({
+          message: "An unknown error occurred while adding blog",
+        });
       }
     } finally {
       setloading(false);
@@ -165,18 +183,24 @@ export const useDeleteBlog = () => {
 };
 
 export const useDeleteUserBlogs = () => {
+  const routeTo = useRouter();
   const [loading, setloading] = useState(true);
   const [blogs, setBlogs] = useState(false);
-  const [error, setError] = useState<BlogErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
   const handleLoginUser = async (blogId: number, userId: number) => {
     try {
       await deleteUserBlogs(blogId, userId);
       setBlogs(true);
     } catch (error) {
-      if (isBlogError(error)) {
-        setError(error);
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          routeTo.push("/login");
+        }
+        setError(error.errors);
       } else {
-        setError({ message: "Delete failed" });
+        setError({
+          message: "An unknown error occurred while adding blog",
+        });
       }
     } finally {
       setloading(false);

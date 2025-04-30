@@ -2,10 +2,11 @@
 import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useUserStoreActions } from "./store/user";
+import { useValidateUser } from "./hooks/user";
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
-  const setUser = useUserStoreActions();
+  const { setUser } = useUserStoreActions();
   useEffect(() => {
     console.log("wrapper useEffect");
     const checkUserData = () => {
@@ -27,8 +28,8 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 
     checkUserData();
   }, [router]);
-
-  return <>{children}</>;
+  useValidateUser();
+  return <main className="flex flex-col gap-3  flex-1">{children}</main>;
 };
 
 export default Wrapper;

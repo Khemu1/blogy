@@ -1,12 +1,13 @@
 import { useEditBlog } from "@/app/hooks/blog";
 import { NewBlogProp } from "@/app/types";
-import { getEditBlogSchema, validateWithSchema } from "@/app/utils/blog";
+import { getEditBlogSchema } from "@/app/utils/blog";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
 import React, { useEffect, useRef, useState } from "react";
 import { ZodError } from "zod";
 import Image from "next/image";
 import styles from "../../styles/form.module.css";
+import { validateWithSchema } from "@/app/utils/comment";
 
 const BlogEditDialog: React.FC<{ blogId: number }> = ({ blogId }) => {
   const [data, setData] = useState<NewBlogProp>({

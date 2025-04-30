@@ -27,11 +27,10 @@ export async function middleware(req: NextRequest) {
         return await sendUserIdIfExists(req);
       }
 
-      // Validate user for other comment-related actions
+      // Pass request to comment middleware
+
       const userValidationResponse = await validateUser(req);
       if (!userValidationResponse.ok) return userValidationResponse;
-
-      // Pass request to comment middleware
       if (req.method === "POST") {
         return await addCommentMiddleware(req, userValidationResponse);
       }
@@ -43,12 +42,11 @@ export async function middleware(req: NextRequest) {
       if (req.method === "GET" && /^\/api\/blogs\/\d+$/.test(pathname)) {
         return await sendUserIdIfExists(req);
       }
-      const userValidationResponse = await validateUser(req);
-      if (!userValidationResponse.ok) return userValidationResponse;
       if (req.method === "POST") {
+        const userValidationResponse = await validateUser(req);
+        if (!userValidationResponse.ok) return userValidationResponse;
         return await addBlogMiddleware(req, userValidationResponse);
       }
-      return userValidationResponse;
     }
 
     if (pathname === "/api/users/myInfo") {
@@ -61,6 +59,14 @@ export async function middleware(req: NextRequest) {
       if (!userValidationResponse.ok) return userValidationResponse;
       return userValidationResponse;
     }
+    if (pathname.startsWith("/api/validate-user")) {
+      if (req.method === "GET") {
+        // Handle upload process
+        const userValidationResponse = await validateUser(req);
+        return userValidationResponse;
+      }
+      return NextResponse.next();
+    }
 
     return NextResponse.next();
   } catch (error) {
@@ -72,9 +78,12 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/api/auth",
+    "/api/validate-user",
     "/api/blogs/:path*",
     "/api/comments/:path*",
     "/api/users/myInfo",
     "/api/upload/process",
+    "/api/upload",
+    "/api/upload/revert",
   ],
 };

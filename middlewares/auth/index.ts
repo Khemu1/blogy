@@ -2,8 +2,6 @@ import { cookies } from "next/headers";
 import { generateAccessToken, verifyToken } from "@/services/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { CustomError } from "@/middlewares/error/CustomError";
-import { errorHandler } from "@/middlewares/error/ErrorHandler";
-
 export async function validateUser(req: NextRequest) {
   console.log("user middleware up");
 
@@ -13,16 +11,11 @@ export async function validateUser(req: NextRequest) {
     const refreshToken = cookieStore.get("refreshToken")?.value;
 
     if (!accessToken && !refreshToken) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      throw new CustomError("Invalid token", 401, "Invalid token", true);
     }
 
     if (accessToken) {
       const accessTokenData = await verifyToken(accessToken, true);
-
-      if (!accessTokenData) {
-        // Invalid access token, redirect to /login
-        return NextResponse.redirect(new URL("/login", req.url));
-      }
 
       const response = NextResponse.next();
       response.headers.set("X-User-Id", accessTokenData.id as string);
@@ -50,9 +43,9 @@ export async function validateUser(req: NextRequest) {
       return response;
     }
 
-    return NextResponse.redirect(new URL("/login", req.url));
+    throw new CustomError("Invalid token", 401, "Invalid token", true);
   } catch (error) {
     console.error("Error with user validation:", error);
-    return errorHandler(error, req);
+    throw error;
   }
 }

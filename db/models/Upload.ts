@@ -2,11 +2,25 @@ import bcrypt from "bcrypt";
 import sequelize from "@/config/db";
 import { DataTypes, Model, Optional } from "sequelize";
 import User from "./User";
+import UploadChunk from "./UploadChunk";
+import Blog from "./Blog";
+export interface UploadModel {
+  id: string;
+  userId: number;
+  blogId: number | null;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: Date;
+  updatedAt: Date;
+  isCompleted: boolean;
+  isCanceled: boolean;
+}
 
 interface UploadCreationAttributes
   extends Optional<
     UploadModel,
-    "createdAt" | "updatedAt" | "isCanceled" | "isCompleted"
+    "createdAt" | "updatedAt" | "isCanceled" | "isCompleted" | "blogId"
   > {}
 
 class Upload
@@ -15,6 +29,7 @@ class Upload
 {
   declare readonly id: string;
   declare readonly userId: number;
+  declare readonly blogId: number | null;
   declare readonly filePath: string;
   declare readonly fileName: string;
   declare readonly fileSize: number;
@@ -32,6 +47,8 @@ class Upload
   static associate() {
     User.hasMany(Upload, { foreignKey: "userId" });
     Upload.belongsTo(User, { foreignKey: "userId" });
+    // Modify this association:
+    Upload.hasMany(UploadChunk, { foreignKey: "upload_id" });
   }
 }
 
@@ -47,6 +64,17 @@ Upload.init(
       allowNull: false,
       references: {
         model: "user",
+        key: "id",
+      },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    },
+    blogId: {
+      type: DataTypes.INTEGER,
+
+      allowNull: true,
+      references: {
+        model: "blog",
         key: "id",
       },
       onDelete: "CASCADE",
@@ -89,20 +117,8 @@ Upload.init(
     sequelize,
     freezeTableName: true,
     timestamps: true,
-    modelName: "upload", // <-- You wrote "user" here by mistake!
+    modelName: "upload",
   }
 );
 
 export default Upload;
-
-export interface UploadModel {
-  id: string;
-  userId: number;
-  fileName: string;
-  fileSize: number;
-  mimeType: string;
-  createdAt: Date;
-  updatedAt: Date;
-  isCompleted: boolean;
-  isCanceled: boolean;
-}

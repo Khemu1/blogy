@@ -1,11 +1,12 @@
 "use client";
 import { LoginFormProps } from "@/app/types";
 import styles from "../styles/form.module.css";
-import { loginSchema, validateWithSchema } from "@/app/utils/user";
+import { loginSchema } from "@/app/utils/user";
 import { useState } from "react";
 import { ZodError } from "zod";
 import { useLoginUser } from "@/app/hooks/user";
 import Link from "next/link"; // Import Link component from Next.js
+import { validateWithSchema } from "../utils/comment";
 
 const Login = () => {
   const schema = loginSchema();

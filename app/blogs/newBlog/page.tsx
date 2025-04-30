@@ -2,14 +2,15 @@
 import { useAddBlog } from "@/app/hooks/blog";
 import { NewBlogProp } from "@/app/types";
 import { useState, useEffect, useRef } from "react";
-import { getNewBlogSchema, validateWithSchema } from "@/app/utils/blog";
+import { getNewBlogSchema } from "@/app/utils/blog";
 import { ZodError } from "zod";
-import styles from "../../styles/form.module.css";
 import Image from "next/image";
 import { marked } from "marked";
 import { useUserStore } from "@/app/store/user";
 import { useRouter } from "next/navigation";
 import FileUploader from "@/app/components/blog/FileUploader";
+import { validateWithSchema } from "@/app/utils/comment";
+import { Loader, CheckCircle } from "lucide-react";
 
 const NewBlog = () => {
   const userStore = useUserStore();
@@ -17,6 +18,7 @@ const NewBlog = () => {
   const [data, setData] = useState<NewBlogProp>({
     title: "",
     content: "",
+    imageId: null,
   });
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
   const [sanitizedContent, setSanitizedContent] = useState<string>("");
@@ -25,8 +27,11 @@ const NewBlog = () => {
 
   const { handleAddBlog, loading, error: APIerror, success } = useAddBlog();
   const [previewWindow, setPreviewWindow] = useState<Window | null>(null);
-
+  const [showPreview, setShowPreview] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const handleSubmit = (data: NewBlogProp, e: React.FormEvent) => {
+    console.log("submit");
+
     e.preventDefault();
     try {
       setErrors(null);
@@ -35,33 +40,40 @@ const NewBlog = () => {
     } catch (error) {
       if (error instanceof ZodError) {
         setErrors(validateWithSchema(error));
-        console.log(validateWithSchema(error));
-      } else {
-        console.error("An error occurred during validation:", error);
       }
+      throw error;
     }
   };
 
   const openPreview = () => {
     if (!previewWindow || previewWindow.closed) {
-      const newWindow = window.open("", "_blank", "width=600,height=400");
+      const newWindow = window.open("", "_blank", "width=800,height=600");
       setPreviewWindow(newWindow);
     }
+    setShowPreview(true);
+  };
+
+  const handleImageUpload = (url: string, file: File) => {
+    console.log("adding image", url, file);
+    setData((prev) => ({ ...prev, imageId: url }));
+    setFile(file);
+  };
+  const handleImageCancle = () => {
+    setData((prev) => ({ ...prev, imageId: null }));
+    setFile(null);
   };
 
   useEffect(() => {
-    // Convert and sanitize content
     const convertAndSanitizeMarkdown = async () => {
       const rawHtml = await marked(data.content);
-      // Remove DOMPurify sanitization here
-      setSanitizedContent(rawHtml); // Use rawHtml directly
+      setSanitizedContent(rawHtml);
     };
 
     const convertAndSanitizeMarkdownForTitle = async () => {
-      const rawHtml = await marked(data.title); // Only if you want Markdown in titles
-      // Remove DOMPurify sanitization here
-      setSanitizedTitle(rawHtml); // Use rawHtml directly
+      const rawHtml = await marked(data.title);
+      setSanitizedTitle(rawHtml);
     };
+
     convertAndSanitizeMarkdown();
     convertAndSanitizeMarkdownForTitle();
   }, [data.content, data.title]);
@@ -72,28 +84,73 @@ const NewBlog = () => {
         previewWindow.document.body.innerHTML = `
         <html>
           <head>
-            <title>${sanitizedTitle || "Title"}</title>
+            <title>${sanitizedTitle || "Preview"}</title>
             <link href="/app/globals.css" rel="stylesheet">
             <style>
-              /* Ensure text is white and background is dark */
               body {
-                background-color: #1f2937; /* Tailwind's bg-gray-900 */
-                color: white; /* Make text white */
+                background-color: #2a303c;
+                color: white;
+                padding: 2rem;
+                max-width: 1200px;
+                margin: 0 auto;
               }
-              .preview_title > * {
-                text-overflow: ellipsis;
-                overflow: hidden !important;
-                white-space: nowrap;
+              .preview-container {
+                background: #20252e;
+                border-radius: 0.5rem;
+                padding: 2rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              }
+              .preview-title {
+                font-size: 2rem;
+                font-weight: bold;
+                margin-bottom: 1.5rem;
+                color: #f3f4f6;
+                border-bottom: 2px solid #374151;
+                padding-bottom: 0.5rem;
+              }
+              .preview-image {
                 width: 100%;
+                max-height: 400px;
+                object-fit: cover;
+                border-radius: 0.5rem;
+                margin-bottom: 1.5rem;
+              }
+              .prose {
+                line-height: 1.6;
+              }
+              .prose img {
                 max-width: 100%;
+                height: auto;
+                border-radius: 0.25rem;
+              }
+              .prose h2 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin-top: 2rem;
+                margin-bottom: 1rem;
+                color: #f3f4f6;
+              }
+              .prose p {
+                margin-bottom: 1rem;
+              }
+              .prose a {
+                color: #60a5fa;
+                text-decoration: underline;
               }
             </style>
           </head>
           <body>
-            <div class="text-white p-4">
-              <h1 class="preview_title text-3xl font-bold mb-4 text-center max-w-full truncate whitespace-nowrap text-ec overflow-hidden">
-                ${sanitizedTitle || "Your title will appear here"}
-              </h1>
+            <div class="preview-container">
+              ${
+                file
+                  ? `<img src="${URL.createObjectURL(
+                      file
+                    )}" class="preview-image" alt="Blog header image" />`
+                  : ""
+              }
+              <h1 class="preview-title">${
+                sanitizedTitle || "Your title will appear here"
+              }</h1>
               <div class="prose prose-lg break-words max-w-full">
                 ${sanitizedContent || "Your content will appear here"}
               </div>
@@ -104,7 +161,7 @@ const NewBlog = () => {
       }
     };
     updatePreviewWindow();
-  }, [sanitizedContent, sanitizedTitle, previewWindow]);
+  }, [sanitizedContent, sanitizedTitle, previewWindow, data.imageId]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -117,97 +174,191 @@ const NewBlog = () => {
   }, [data.content]);
 
   useEffect(() => {
-    let timeOut: NodeJS.Timeout;
-    timeOut = setTimeout(() => {
-      if (userStore.id < 1) {
+    if (userStore.id < 1) {
+      const timeout = setTimeout(() => {
         routeTo.push("/blogs");
-      }
-    }, 100);
-    return () => clearTimeout(timeOut);
-  }, [userStore.id]);
+      }, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [userStore.id, routeTo]);
+
   return (
-    <div className="flex flex-col justify-center gap-6 items-center w-full p-4 ">
-      <div className="flex  flex-col gap-3 ">
-        <button
-          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600"
-          onClick={openPreview}
-        >
-          Open Preview in New Tab
-        </button>
-      </div>
-      <form
-        className="flex w-[85dvw] sm:w-[500px] flex-col justify-center items-center gap-4 bg-base-200 p-6 rounded-lg shadow-md  transition-all"
-        onSubmit={(e: React.FormEvent) => handleSubmit(data, e)}
-      >
-        <div className="flex flex-col w-full h-max">
-          <label htmlFor="title" className="font-semibold text-lg mb-2">
-            Title
-          </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            placeholder="Title"
-            value={data.title}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setData((prev) => ({ ...prev, title: e.target.value }))
-            }
-            className="p-3 rounded-md focus:outline-none"
-          />
-          <FileUploader />
-        </div>
-        {(errors?.title || APIerror?.title) && (
-          <p className={styles.error}>{errors?.title ?? APIerror?.title}</p>
-        )}
-        <div className="flex flex-col w-full">
-          <label htmlFor="content" className="font-semibold text-lg mb-2 h-max">
-            Content
-          </label>
-          <textarea
-            id="content"
-            name="content"
-            placeholder="Content"
-            value={data.content}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              setData((prev) => ({ ...prev, content: e.target.value }))
-            }
-            ref={textareaRef}
-            className="p-3 rounded-md focus:outline-none"
-            rows={6}
-          />
-        </div>
-        {(errors?.content || APIerror?.content || APIerror?.message) && (
-          <p className={styles.error}>{errors?.content ?? APIerror?.content}</p>
-        )}
-        <div
-          className={`submit_comment_container mt-4 bg-base-300 ${
-            loading || success
-              ? "bg-[#eb512b]"
-              : "bg-base-200 hover:bg-[#eb512b] hover:text-white"
-          }`}
-        >
-          {loading ? (
-            <div className="flex mt-5 w-full h-full justify-center items-center">
-              <span className="loading loading-dots loading-lg"></span>
+    <div className="max-w-4xl mx-auto p-4 md:p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Create New Blog Post
+      </h1>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Editor Section */}
+        <div className="flex-1">
+          <form
+            className="bg-base-300 p-6 rounded-lg shadow-lg"
+            onSubmit={(e: React.FormEvent) => handleSubmit(data, e)}
+          >
+            <div className="mb-6">
+              <label
+                htmlFor="title"
+                className="block text-lg font-medium mb-2 dark:text-gray-200"
+              >
+                Title
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="Enter your blog title"
+                value={data.title}
+                onChange={(e) =>
+                  setData((prev) => ({ ...prev, title: e.target.value }))
+                }
+                className="w-full p-3  rounded-md focus:outline-0   dark:text-white"
+              />
+              {errors?.title && (
+                <p className="mt-1 text-sm text-red-500">{errors.title}</p>
+              )}
             </div>
-          ) : success ? (
-            <Image
-              src={"/assets/icons/checkmark.svg"}
-              width={64}
-              height={64}
-              alt="Comment Created"
-              priority={true}
-            />
-          ) : (
-            <button
-              type={success ? "button" : "submit"}
-              className="font-semibold w-full rounded-lg py-3 transition text-2xl"
-            >
-              Submit
-            </button>
-          )}
+
+            <div className="mb-6">
+              <label className="block text-lg font-medium mb-2 dark:text-gray-200">
+                Featured Image
+              </label>
+              <FileUploader
+                onUploadSuccess={handleImageUpload}
+                onRevert={handleImageCancle}
+              />
+            </div>
+
+            <div className="mb-6">
+              <label
+                htmlFor="content"
+                className="block text-lg font-medium mb-2 dark:text-gray-200"
+              >
+                Content
+              </label>
+              <textarea
+                id="content"
+                name="content"
+                placeholder="Write your blog content here (Markdown supported)"
+                value={data.content}
+                onChange={(e) =>
+                  setData((prev) => ({ ...prev, content: e.target.value }))
+                }
+                ref={textareaRef}
+                className="w-full p-3  rounded-md focus:outline-0  dark:text-white min-h-[200px]"
+                rows={10}
+              />
+              {errors?.content && (
+                <p className="mt-1 text-sm text-red-500">{errors.content}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+              <button
+                type="button"
+                onClick={openPreview}
+                className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Preview
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className={`px-6 py-3 rounded-lg text-white font-medium transition-colors flex-1 max-w-xs ${
+                  loading
+                    ? "bg-[#eb512b]/85"
+                    : "bg-[#eb512b] hover:bg-[#eb512b]/90"
+                }`}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader className="w-5 h-5 animate-spin" />
+                    Publishing...
+                  </span>
+                ) : success ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Published!
+                  </span>
+                ) : (
+                  "Publish Post"
+                )}
+              </button>
+            </div>
+
+            {APIerror?.message && (
+              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-md">
+                {APIerror.message}
+              </div>
+            )}
+          </form>
         </div>
-      </form>
+
+        {showPreview && (
+          <div className="flex-1 hidden lg:block w-[450px]">
+            <div className="bg-base-300 p-6 rounded-lg shadow-lg sticky top-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white">Live Preview</h2>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="prose prose-invert min-w-full max-w-full">
+                {file && (
+                  <div className="relative w-full h-48 rounded-md overflow-hidden mb-4">
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt="Blog header preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <h1 className="text-3xl font-bold mb-4 text-wrap break-words">
+                  {data.title || "Your title will appear here"}
+                </h1>
+                <div
+                  className="prose prose-invert max-w-none overflow-auto break-words"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      sanitizedContent ||
+                      "<p>Your content will appear here</p>",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

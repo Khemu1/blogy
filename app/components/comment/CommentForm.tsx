@@ -3,8 +3,7 @@ import { useAddComment } from "../../hooks/comment";
 import { getCommentSchema, validateWithSchema } from "@/app/utils/comment";
 import { useEffect, useRef, useState } from "react";
 import { ZodError } from "zod";
-import styles from "../../styles/form.module.css";
-import Image from "next/image";
+import { Loader2, CheckCircle } from "lucide-react";
 
 const CommentForm: React.FC<{
   blogId: number;
@@ -19,8 +18,9 @@ const CommentForm: React.FC<{
     handleAddComment,
   } = useAddComment();
   const schema = getCommentSchema();
-  const newCommentRef = useRef<HTMLTextAreaElement>(null);
-  const HandleSubmit = async (
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleSubmit = async (
     blogId: number,
     content: string,
     e: React.FormEvent
@@ -32,18 +32,15 @@ const CommentForm: React.FC<{
       await handleAddComment(blogId, content);
     } catch (error) {
       if (error instanceof ZodError) {
-        const validationErrors = validateWithSchema(error);
-        setErrors(validationErrors);
-        console.log(validationErrors);
+        setErrors(validateWithSchema(error));
       } else {
-        setErrors({ content: "Error parsing comment" });
-        console.log("Error parsing comment", error);
+        setErrors({ content: "Error submitting comment" });
       }
     }
   };
 
   useEffect(() => {
-    const textarea = newCommentRef.current;
+    const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
@@ -56,64 +53,62 @@ const CommentForm: React.FC<{
       refetchComments(blogId);
     }
   }, [success, blogId]);
+
   return (
-    <div>
-      <form onSubmit={(e: React.FormEvent) => HandleSubmit(blogId, data, e)}>
-        <textarea
-          value={data}
-          id="NewComment"
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setData(e.target.value)
-          }
-          className={`${
-            errors?.content || APIError?.content
-              ? styles.error_bottom_border
-              : ""
-          }`}
-          ref={newCommentRef}
-        />
-        {(APIError?.content || APIError?.message || errors?.content) && (
-          <p className={styles.error_message}>
-            {errors?.content ?? APIError?.content ?? APIError?.message}
-          </p>
-        )}
-        <div
-          className={`submit_comment_container mt-4 ${
-            loading || success
-              ? "bg-[#eb512b]"
-              : "bg-base-200 hover:bg-secondary hover:text-white"
-          }`}
-        >
-          {loading ? (
-            <div className="flex mt-5 w-full h-full justify-center items-center">
-              <span className="loading loading-dots loading-lg"></span>
-            </div>
-          ) : success ? (
-            <Image
-              src={"/assets/icons/checkmark.svg"}
-              width={64}
-              height={64}
-              alt="Comment Created"
-              priority={true}
-            />
-          ) : (
-            <button
-              type={success ? "button" : "submit"}
-              className="font-semibold w-full rounded-lg py-3 transition text-2xl"
-            >
-              Submit
-            </button>
+    <div className="mb-8">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        Leave a comment
+      </h3>
+
+      <form
+        onSubmit={(e) => handleSubmit(blogId, data, e)}
+        className="space-y-4"
+      >
+        <div>
+          <textarea
+            ref={textareaRef}
+            value={data}
+            onChange={(e) => setData(e.target.value)}
+            placeholder="Share your thoughts..."
+            className={`w-full px-4 py-3 border ${
+              errors?.content || APIError?.content
+                ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                : ""
+            } rounded-lg shadow-sm focus:outline-0 bg-base-100 text-white border-b-4`}
+            rows={4}
+          />
+          {(APIError?.content || APIError?.message || errors?.content) && (
+            <p className="mt-2 text-sm text-red-600">
+              {errors?.content ?? APIError?.content ?? APIError?.message}
+            </p>
           )}
         </div>
-        {APIError?.message && (
-          <p
-            className={
-              "flex w-full m-auto text-red-600 justify-center font-semibold mt-3"
-            }
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading || success}
+            className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
+              loading || success
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-[#eb512b] hover:bg-[#eb512b]/90"
+            } focus:outline-0  transition-colors duration-200`}
           >
-            {APIError?.message}
-          </p>
-        )}
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                Posting...
+              </>
+            ) : success ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Posted!
+              </>
+            ) : (
+              "Post Comment"
+            )}
+          </button>
+        </div>
       </form>
     </div>
   );

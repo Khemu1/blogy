@@ -1,4 +1,6 @@
 import { NewCommentProps } from "@/app/types";
+import { CustomError } from "@/middlewares/error/CustomError";
+import { handleResponse } from "../blog/blogAPI";
 
 export const addComment = async (blogId: number, content: string) => {
   try {
@@ -9,18 +11,7 @@ export const addComment = async (blogId: number, content: string) => {
       },
       body: JSON.stringify({ blogId, content }),
     });
-    if (!response.ok) {
-      let errorMessage = { message: "Unexpected Error" };
-      try {
-        const errorData: { message: string } = await response.json();
-        errorMessage = errorData || errorMessage;
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        throw error;
-      }
-      throw errorMessage;
-    }
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
     throw error;
   }
@@ -28,24 +19,8 @@ export const addComment = async (blogId: number, content: string) => {
 
 export const getBlogComments = async (id: number) => {
   try {
-    const response = await fetch(`/api/comments/blog/${id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      let errorMessage = { message: "Unexpected Error" };
-      try {
-        const errorData: { message: string } = await response.json();
-        errorMessage = errorData || errorMessage;
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        throw error;
-      }
-      throw errorMessage;
-    }
-    return await response.json();
+    const response = await fetch(`/api/comments/blog/${id}`);
+    return await handleResponse(response);
   } catch (error) {
     throw error;
   }
@@ -64,18 +39,7 @@ export const editMyComment = async (
       },
       body: JSON.stringify({ commentId, blogId, comment }),
     });
-    if (!response.ok) {
-      let errorMessage = { message: "Unexpected Error" };
-      try {
-        const errorData: { message: string } = await response.json();
-        errorMessage = errorData || errorMessage;
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        throw error;
-      }
-      throw errorMessage;
-    }
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
     throw error;
   }
@@ -94,18 +58,7 @@ export const editUserComment = async (
       },
       body: JSON.stringify({ commentId, blogId, comment }),
     });
-    if (!response.ok) {
-      let errorMessage = { message: "Unexpected Error" };
-      try {
-        const errorData: { message: string } = await response.json();
-        errorMessage = errorData || errorMessage;
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        throw error;
-      }
-      throw errorMessage;
-    }
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
     throw error;
   }
@@ -119,18 +72,7 @@ export const deleteMyComment = async (commentId: number) => {
         "Content-Type": "application/json",
       },
     });
-    if (!response.ok) {
-      let errorMessage = { message: "Unexpected Error" };
-      try {
-        const errorData: { message: string } = await response.json();
-        errorMessage = errorData || errorMessage;
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        throw error;
-      }
-      throw errorMessage;
-    }
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
     throw error;
   }
@@ -144,18 +86,7 @@ export const deleteComment = async (id: number) => {
         "Content-Type": "application/json",
       },
     });
-    if (!response.ok) {
-      let errorMessage = { message: "Unexpected Error" };
-      try {
-        const errorData: { message: string } = await response.json();
-        errorMessage = errorData || errorMessage;
-      } catch (error) {
-        console.error("Error parsing response:", error);
-        throw error;
-      }
-      throw errorMessage;
-    }
-    return await response.json();
+    return await handleResponse(response);
   } catch (error) {
     throw error;
   }

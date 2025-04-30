@@ -85,7 +85,6 @@ Comment.init(
     freezeTableName: true,
     timestamps: true,
     modelName: "comment",
-    paranoid: true,
   }
 );
 

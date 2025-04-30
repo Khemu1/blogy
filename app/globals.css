@@ -30,8 +30,11 @@
 * {
   box-sizing: border-box;
 }
+
 body {
-  height: 100dvh;
+  display: flex;
+  min-height: 100dvh;
+  min-width: 100dvw;
 }
 input {
   @apply px-2 py-1 rounded-lg  border-b-4 transition-all;

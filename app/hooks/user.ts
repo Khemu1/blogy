@@ -1,5 +1,5 @@
-import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
 import { useUserStoreActions } from "../store/user";
 import {
   RegisterErrorProps,
@@ -9,14 +9,22 @@ import {
   MyInfoProps,
 } from "../types";
 import { isRegisterError, isLoginError } from "../utils/user";
-import { addUser, loginUser, getMyInfo } from "../utils/user/userAPI";
+import {
+  addUser,
+  loginUser,
+  getMyInfo,
+  validateUser,
+} from "../utils/user/userAPI";
 import { storeUserData } from "../utils";
+import { CustomError } from "@/middlewares/error/CustomError";
+
+export const authenticatedPaths = ["/blogs/newBlog"];
 
 export const useAddUser = () => {
-  const setUser = useUserStoreActions();
+  const { setUser } = useUserStoreActions();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<RegisterErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
 
   const handleAddUser = async (data: RegisterFormProps) => {
     try {
@@ -26,10 +34,10 @@ export const useAddUser = () => {
       setUser(res.user);
       router.push("/blogs");
     } catch (error) {
-      if (isRegisterError(error)) {
-        setError(error);
+      if (error instanceof CustomError) {
+        setError(error.errors);
       } else {
-        setError({ message: "Registration failed" });
+        setError({ message: "An unknown registration error occurred" });
       }
     } finally {
       setLoading(false);
@@ -40,10 +48,10 @@ export const useAddUser = () => {
 };
 
 export const useLoginUser = () => {
-  const setUser = useUserStoreActions();
+  const { setUser } = useUserStoreActions();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<LoginErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
 
   const handleLoginUser = async (data: LoginFormProps) => {
     try {
@@ -53,10 +61,10 @@ export const useLoginUser = () => {
       setUser(res.user);
       router.push("/blogs");
     } catch (error) {
-      if (isLoginError(error)) {
-        setError(error);
+      if (error instanceof CustomError) {
+        setError(error.errors);
       } else {
-        setError({ message: "Login failed" });
+        setError({ message: "An unknown login error occurred" });
       }
     } finally {
       setLoading(false);
@@ -67,27 +75,43 @@ export const useLoginUser = () => {
 };
 
 export const useGetMyInfo = () => {
-  const setUser = useUserStoreActions();
   const router = useRouter();
   const [data, setData] = useState<MyInfoProps | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<LoginErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
 
   const handleGetMyInfo = useCallback(async () => {
     try {
       setData(await getMyInfo());
     } catch (error) {
-      if (isLoginError(error)) {
-        setError(error);
-        router.push("/login");
+      if (error instanceof CustomError) {
+        setError(error.errors);
       } else {
-        setError({ message: "Login failed" });
-        router.push("/login");
+        setError({ message: "An unknown error occurred while fetching info" });
       }
+      router.push("/login");
     } finally {
       setLoading(false);
     }
   }, [router]);
 
   return { handleGetMyInfo, loading, error, data };
+};
+
+export const useValidateUser = () => {
+  const { reset } = useUserStoreActions();
+  const pathname = usePathname();
+  const router = useRouter();
+  const handleValidateUser = async () => {
+    try {
+      await validateUser();
+    } catch (error) {
+      router.push("/login");
+      if (typeof window !== "undefined") localStorage.removeItem("userData");
+      reset();
+    }
+  };
+  useEffect(() => {
+    if (authenticatedPaths.includes(pathname)) handleValidateUser();
+  }, [router, pathname]);
 };

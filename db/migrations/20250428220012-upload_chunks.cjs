@@ -1,13 +1,14 @@
 "use strict";
+const { DataTypes } = require("sequelize");
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("upload-chunk", {
       id: {
-        type: Sequelize.STRING,
+        type: DataTypes.INTEGER,
         primaryKey: true,
-        allowNull: false,
+        autoIncrement: true,
       },
       upload_id: {
         type: Sequelize.STRING,
@@ -19,10 +20,7 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      chunk_index: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
+
       chunk_length: {
         type: Sequelize.BIGINT,
         allowNull: false,
@@ -32,8 +30,8 @@ module.exports = {
         allowNull: false,
       },
       created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
         allowNull: false,
       },
     });

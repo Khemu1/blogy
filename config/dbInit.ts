@@ -4,6 +4,8 @@ import Blog from "@/db/models/Blog";
 import sequelize from "./db";
 import User from "@/db/models/User";
 import Comment from "@/db/models/Comment";
+import Upload from "@/db/models/Upload";
+import UploadChunk from "@/db/models/UploadChunk";
 
 let initialized = false;
 
@@ -37,6 +39,8 @@ async function initializeDatabase() {
   User.associate();
   Blog.associate();
   Comment.associate();
+  Upload.associate();
+  UploadChunk.associate();
 
   await syncModels();
 

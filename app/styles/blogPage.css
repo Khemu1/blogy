@@ -1,9 +1,12 @@
 /* styles/blog.module.css */
 
 .markdownPreview_page {
+  will-change: transform;
   @apply leading-relaxed text-[1.15rem] box-border w-[inherit] h-[inherit];
 }
-
+.markdownPreview_page > * {
+  will-change: transform;
+}
 .markdownPreview_page h1 {
   @apply text-2xl;
 }

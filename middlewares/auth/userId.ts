@@ -2,48 +2,41 @@ import { verifyToken } from "@/services/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function sendUserIdIfExists(req: NextRequest) {
-  console.log(" Id cheker middleware up");
   try {
-    // Retrieve tokens from cookies
     const accessToken = req.cookies.get("accessToken")?.value;
     const refreshToken = req.cookies.get("refreshToken")?.value;
 
     if (!accessToken && !refreshToken) {
-      // No tokens provided, return response immediately
-      return new NextResponse();
+      console.log("[sendUserIdIfExists] No tokens found");
+      return NextResponse.next();
     }
+
+    let tokenData = null;
 
     if (accessToken) {
-      const accessTokenData = await verifyToken(accessToken, true);
-
-      if (!accessTokenData) {
-        return new NextResponse();
+      try {
+        tokenData = await verifyToken(accessToken, true);
+      } catch {
+        console.log("[sendUserIdIfExists] Access token invalid or expired");
       }
-
-      const response = NextResponse.next();
-      response.headers.set("X-User-Id", accessTokenData.id as string);
-      return response;
     }
 
-    if (!accessToken && refreshToken) {
-      // Validate the refresh token
-      const refreshTokenData = await verifyToken(refreshToken, false);
-
-      if (!refreshTokenData) {
-        return new NextResponse();
+    if (!tokenData && refreshToken) {
+      try {
+        tokenData = await verifyToken(refreshToken, false);
+      } catch {
+        console.log("[sendUserIdIfExists] Refresh token invalid or expired");
       }
-
-      const response = NextResponse.next();
-      response.headers.set("X-User-Id", refreshTokenData.id as string);
-      return response;
     }
 
-    return new NextResponse();
+    const response = NextResponse.next();
+
+    if (tokenData?.id) {
+      response.headers.set("X-User-Id", String(tokenData.id));
+    }
+
+    return response;
   } catch (error) {
-    console.error("Error checking User Id:", error);
-    return NextResponse.json(
-      { message: "User Id check failed" },
-      { status: 500 }
-    );
+    throw error;
   }
 }

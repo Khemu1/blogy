@@ -1,32 +1,113 @@
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
-import { createUpload } from "@/services/uploadServices";
+import { doesUserExist } from "@/services/authServices";
+import { createUpload, createUploadChunk } from "@/services/uploadServices";
 import { mkdirSync } from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import { join } from "path";
+import { appendChunkToUpload } from "@/services/helpers/upload";
+import { CustomError } from "@/middlewares/error/CustomError";
 
 export const POST = async (req: NextRequest) => {
   try {
-    const path = "temp";
-    const userId = req.headers.get("X-User-Id") as string;
-    const form = await req.formData();
+    const userIdHeader = req.headers.get("X-User-Id");
+    if (!userIdHeader) {
+      throw new CustomError("Missing user ID header", 400);
+    }
 
-    const fileSize = req.headers.get("Content-Length") as string;
-    const metaDtat = form.get("metadata") as string;
-    const metadata: Record<string, string> = JSON.parse(metaDtat);
-    console.log("metadata", metadata);
-    mkdirSync(join(process.cwd(), path), { recursive: true });
-    const uniqueId = await createUpload({
-      userId: Number(userId),
+    const userId = Number(userIdHeader);
+    if (isNaN(userId)) {
+      throw new CustomError("Invalid user ID", 400);
+    }
+
+    await doesUserExist(userId);
+
+    // Ensure temp directory exists
+    const tempPath = join(process.cwd(), "temp");
+    mkdirSync(tempPath, { recursive: true });
+
+    const form = await req.formData();
+    const { metadata, file } = parseFormData(form);
+
+    const fileSize = Number(req.headers.get("Content-Length"));
+    if (!fileSize || isNaN(fileSize)) {
+      return NextResponse.json({ error: "Invalid file size" }, { status: 400 });
+    }
+
+    const uploadId = await createUpload({
+      userId,
       fileName: metadata.name,
       mimeType: metadata.type,
-      fileSize: +fileSize,
+      fileSize,
     });
-    return new Response(uniqueId, {
+
+    // Handle small file upload directly
+    if (fileSize < 500_000 && file) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const chunk = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength
+      );
+
+      await appendChunkToUpload(uploadId, chunk);
+      await createUploadChunk({
+        uploadId,
+        chunkLength: fileSize,
+        offset: 1,
+      });
+    }
+
+    return new Response(uploadId, {
       headers: {
-        "Content-Type": "plain/text",
+        "Content-Type": "text/plain",
       },
     });
   } catch (error) {
     return errorHandler(error, req);
   }
+};
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+type ParsedFormData = {
+  metadata: { name: string; type: string };
+  file: File;
+};
+
+// for some reason when trying to extract the file from the form data, it's not working
+// had to create this method in order to make it work some how
+const parseFormData = (formData: FormData): ParsedFormData => {
+  let metadata: ParsedFormData["metadata"] | null = null;
+  let file: File | null = null;
+
+  for (const [key, value] of Array.from(formData.entries())) {
+    if (key === "metadata" && typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        if (
+          typeof parsed.name !== "string" ||
+          typeof parsed.type !== "string"
+        ) {
+          throw new Error("Missing required metadata fields");
+        }
+        metadata = parsed;
+      } catch (err) {
+        throw new CustomError("Invalid metadata format", 400);
+      }
+    } else if (key === "file" && value instanceof File) {
+      file = value;
+    }
+  }
+
+  if (!metadata) {
+    throw new CustomError("Metadata is required", 400);
+  }
+  if (!file) {
+    throw new CustomError("File is required", 400);
+  }
+
+  return { metadata, file };
 };

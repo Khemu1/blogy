@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
-import { getNewBlogSchema, validateWithSchema } from "@/app/utils/blog";
+import { getNewBlogSchema } from "@/app/utils/blog";
 import { ZodError } from "zod";
-import { errorHandler } from "../error/ErrorHandler";
+import { CustomError } from "../error/CustomError";
+import { validateWithSchema } from "@/app/utils/comment";
 
 export async function addBlogMiddleware(req: NextRequest, res: NextResponse) {
   const data: { title: string; content: string } = await req.json();
@@ -19,12 +20,9 @@ export async function addBlogMiddleware(req: NextRequest, res: NextResponse) {
     return response;
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json(
-        { errors: validateWithSchema(error) },
-        { status: 400 }
-      );
-    } else {
-      return errorHandler(error, req);
+      const errors = validateWithSchema(error);
+      throw new CustomError("Invalid Blog Data", 400, "", true, "", errors);
     }
+    throw error;
   }
 }

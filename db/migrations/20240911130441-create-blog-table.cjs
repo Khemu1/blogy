@@ -21,6 +21,7 @@ module.exports = {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       },
+
       title: {
         type: DataTypes.STRING,
         allowNull: false,

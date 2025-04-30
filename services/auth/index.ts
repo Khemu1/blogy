@@ -63,8 +63,12 @@ export const verifyToken = async (token: string, access: boolean) => {
     });
     return payload;
   } catch (error) {
-    console.log(`${token ? "access token" : "refresh token"}`, error);
-    return null;
+    throw new CustomError(
+      `Invalid ${access ? "access" : "refresh"} token`,
+      401,
+      "Invalid token",
+      true
+    );
   }
 };
 

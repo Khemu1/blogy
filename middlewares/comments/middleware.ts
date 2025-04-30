@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getCommentSchema, validateWithSchema } from "@/app/utils/comment";
 import { ZodError } from "zod";
-import { errorHandler } from "../error/ErrorHandler";
+import { CustomError } from "../error/CustomError";
 
 export async function addCommentMiddleware(
   req: NextRequest,
@@ -27,13 +27,11 @@ export async function addCommentMiddleware(
     return response;
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json(
-        { errors: validateWithSchema(error) },
-        { status: 400 }
-      );
+      const errors = validateWithSchema(error);
+      throw new CustomError("Invalid Comment Data", 400, "", true, "", errors);
     } else {
       console.log("error checking for comment Data");
-      return errorHandler(error, req);
+      throw error;
     }
   }
 }
