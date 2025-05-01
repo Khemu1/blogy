@@ -1,9 +1,6 @@
-import bcrypt from "bcrypt";
 import sequelize from "@/config/db";
 import { DataTypes, Model, Optional } from "sequelize";
-import User from "./User";
-import UploadChunk from "./UploadChunk";
-import Blog from "./Blog";
+
 export interface UploadModel {
   id: string;
   userId: number;
@@ -39,17 +36,6 @@ class Upload
   declare createdAt: Date;
   declare updatedAt: Date;
   declare deletedAt: Date | null;
-
-  public static hashPassword(password: string): string {
-    return bcrypt.hashSync(password, 10);
-  }
-
-  static associate() {
-    User.hasMany(Upload, { foreignKey: "userId" });
-    Upload.belongsTo(User, { foreignKey: "userId" });
-    // Modify this association:
-    Upload.hasMany(UploadChunk, { foreignKey: "upload_id" });
-  }
 }
 
 Upload.init(

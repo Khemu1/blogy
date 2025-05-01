@@ -11,9 +11,13 @@ const Page = () => {
   const { loading, data, handleGetBlogs, error } = useGetBlogs();
   const searchParams = useSearchParams();
 
-  const [currentPage, setCurrentPage] = useState(
-    parseInt(searchParams.get("page") ?? "1", 10)
-  );
+  // Extract params once and cache them
+  const query = searchParams.get("q") ?? "";
+  const sortBy = searchParams.get("sortBy") ?? "create-d-asc";
+  const searchBy = searchParams.get("searchBy") ?? "";
+
+  const initialPage = parseInt(searchParams.get("page") ?? "1", 10);
+  const [currentPage, setCurrentPage] = useState(initialPage);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
@@ -21,39 +25,35 @@ const Page = () => {
 
       setCurrentPage(newPage);
 
-      const AllsearchParams = new URLSearchParams(window.location.search);
-      AllsearchParams.set("page", newPage.toString());
+      const newSearchParams = new URLSearchParams(window.location.search);
+      newSearchParams.set("page", newPage.toString());
       const newUrl = `${
         window.location.pathname
-      }?${AllsearchParams.toString()}`;
+      }?${newSearchParams.toString()}`;
       window.history.pushState({}, "", newUrl);
     },
     [currentPage]
   );
 
   useEffect(() => {
-    const sortBy = searchParams.get("sortBy") ?? "create-d-asc";
-    if (!searchParams.has("sortBy")) {
+    if (!searchParams.get("sortBy")) {
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.set("sortBy", sortBy);
       window.history.pushState({}, "", newUrl.toString());
     }
 
-    handleGetBlogs(
-      searchParams.get("q") ?? "",
-      sortBy,
-      searchParams.get("searchBy") ?? "",
-      currentPage
-    );
-  }, [handleGetBlogs, searchParams, currentPage]);
+    handleGetBlogs(query, sortBy, searchBy, currentPage);
+  }, [query, sortBy, searchBy, currentPage, handleGetBlogs]);
+
   useEffect(() => {
     if (error) {
       setToast(error.message, "error");
     }
-  }, [error]);
+  }, [error, setToast]);
+
   if (loading) {
     return (
-      <div className="flex w-full flex-1 justify-center items-center ">
+      <div className="flex w-full flex-1 justify-center items-center">
         <span className="loading loading-spinner w-[5rem]"></span>
       </div>
     );

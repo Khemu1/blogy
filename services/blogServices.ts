@@ -3,7 +3,7 @@ import Blog from "@/db/models/Blog";
 import Comment from "@/db/models/Comment";
 import User from "@/db/models/User";
 import { CustomError } from "@/middlewares/error/CustomError";
-import { NewBlogProp, SearchParams, updateBlogParams } from "@/app/types";
+import { EditBlogProps, NewBlogProp, SearchParams } from "@/app/types";
 import { NextRequest } from "next/server";
 import { Op } from "sequelize";
 import Upload from "@/db/models/Upload";
@@ -177,13 +177,8 @@ export const getBlogService = async (blogId: number, userId: number) => {
           attributes: ["id", "username", "email"],
         },
         {
-          model: Upload,
-          required: false, //  allows the blog to be returned even if no upload
-          attributes: ["id", "mimeType"],
-          as: "image",
-          where: {
-            blogId: blogId,
-          },
+          association: "image",
+          required: false,
         },
       ],
     });
@@ -220,41 +215,45 @@ export const deleteBlogService = async (blogId: number, userId: number) => {
 export const updateBlogService = async (
   blogId: number,
   userId: number,
-  blogData: updateBlogParams
+  blogData: EditBlogProps
 ) => {
   try {
-    if (isNaN(blogId) || blogId < 1) {
-      throw new CustomError(
-        "Invalid ID",
-        400,
-        "Make sure that the ID is valid.",
-        true
+    const [updatedCount] = await Blog.update(
+      { title: blogData.title, content: blogData.content },
+      { where: { id: blogId, userId: userId } }
+    );
+
+    if (updatedCount === 0) {
+      throw new CustomError("Blog update failed or blog not found", 404);
+    }
+    console.log("updatedCount", blogData);
+    if (blogData.image && typeof blogData.image === "string") {
+      console.log("we have a new image");
+      const deleted = await Upload.destroy({ where: { blogId } });
+      const findImage = await Upload.findOne({
+        where: { id: blogData.image },
+      });
+      if (!findImage) {
+        throw new CustomError("Image not found for update", 404);
+      }
+      const [uploadUpdated] = await Upload.update(
+        { isCompleted: true, blogId: blogId },
+        { where: { id: blogData.image } }
       );
+
+      if (uploadUpdated === 0) {
+        throw new CustomError("Failed to update the uploaded image", 500);
+      }
+      moveFileFromTempToUploads(findImage.id, findImage.mimeType);
     }
 
-    const blog = await Blog.findOne({
-      where: {
-        id: blogId,
-        userId: userId,
-      },
-    });
-    if (!blog) {
-      throw new CustomError(
-        "Blog Not Found",
-        404,
-        "The blog post with the specified ID was not found.",
-        true
-      );
+    if (blogData.image === null) {
+      console.log("we have a null image , deleting");
+      const deleted = await Upload.destroy({ where: { blogId } });
+      if (deleted === 0) {
+        throw new CustomError("No image found to delete", 404);
+      }
     }
-    const newBlog = await blog.update({ ...blogData, updatedAt: new Date() });
-    const {
-      id,
-      userId: _,
-      deletedAt,
-      updatedAt,
-      ...modifiedBlog
-    } = newBlog.get();
-    return modifiedBlog;
   } catch (err) {
     throw err;
   }
@@ -269,6 +268,30 @@ export const getUserBlogsService = async (userId: number) => {
     return blogs;
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+export const getBlogForEditService = async (blogId: number, userId: number) => {
+  try {
+    const blog = await Blog.findOne({
+      where: {
+        id: blogId,
+        userId: userId,
+      },
+      include: [
+        {
+          association: "image",
+          required: false,
+        },
+      ],
+    });
+    if (!blog) {
+      console.log("blog for edit found ", blog);
+      throw new CustomError("Blog Not Found", 404);
+    }
+    return blog;
+  } catch (error) {
     throw error;
   }
 };

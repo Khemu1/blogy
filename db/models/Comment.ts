@@ -1,7 +1,6 @@
 import sequelize from "@/config/db";
 import { CommentModel } from "@/app/types";
 import { DataTypes, Model, Optional } from "sequelize";
-import Blog from "./Blog";
 
 // Define which attributes are optional for creation
 interface CommentCreationAttributes
@@ -22,10 +21,6 @@ class Comment
   declare createdAt: Date;
   declare updatedAt: Date;
   declare deletedAt: Date | null;
-
-  static associate() {
-    Comment.belongsTo(Blog, { foreignKey: "blogId" });
-  }
 
   // You can add methods specific to this model here if needed
 }

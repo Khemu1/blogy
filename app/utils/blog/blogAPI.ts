@@ -1,4 +1,4 @@
-import { BlogErrorProps, EditBlogProp, NewBlogProp } from "@/app/types";
+import { EditBlogProps, NewBlogProp } from "@/app/types";
 import { CustomError } from "@/middlewares/error/CustomError";
 
 export const handleResponse = async (response: Response) => {
@@ -75,7 +75,7 @@ export const addBlog = async (
   }
 };
 
-export const editBlog = async (id: number, data: EditBlogProp) => {
+export const editBlog = async (id: number, data: EditBlogProps) => {
   try {
     const response = await fetch(`/api/blogs/${id}`, {
       method: "PUT",
@@ -115,6 +115,18 @@ export const deleteUserBlogs = async (blogId: number, userId: number) => {
 export const getBlogComments = async (blogId: number) => {
   try {
     const response = await fetch(`/api/comments/blog/${blogId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getBlogForEdit = async (blogId: number) => {
+  try {
+    const response = await fetch(`/api/blogs/fetch/${blogId}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });

@@ -4,7 +4,10 @@ import {
   loginMiddleware,
 } from "./middlewares/users/middleware";
 import { addCommentMiddleware } from "./middlewares/comments/middleware";
-import { addBlogMiddleware } from "./middlewares/blogs/middleware";
+import {
+  addBlogMiddleware,
+  editBlogMiddleware,
+} from "./middlewares/blogs/middleware";
 import { validateUser } from "./middlewares/auth";
 import { sendUserIdIfExists } from "./middlewares/auth/userId";
 import { errorHandler } from "./middlewares/error/ErrorHandler";
@@ -48,13 +51,18 @@ export async function middleware(req: NextRequest) {
       }
       if (req.method === "PUT") {
         const userValidationResponse = await validateUser(req);
-        return userValidationResponse;
+        return await editBlogMiddleware(req, userValidationResponse);
       }
       if (req.method === "DELETE") {
         console.log("inside delete blog middleware");
         const userValidationResponse = await validateUser(req);
         return userValidationResponse;
       }
+    }
+
+    if (pathname.includes("/api/blogs/fetch")) {
+      const userValidationResponse = await validateUser(req);
+      return userValidationResponse;
     }
 
     if (pathname.includes("/api/users")) {

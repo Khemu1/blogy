@@ -7,17 +7,18 @@ import {
   getBlog,
   deleteBlog,
   getUserBlogs,
+  getBlogForEdit,
 } from "../utils/blog/blogAPI";
 import {
   AllBlogProps,
-  BlogErrorProps,
   BlogProps,
-  EditBlogProp,
+  EditBlogProps,
   NewBlogProp,
 } from "@/app/types";
 import { useRouter } from "next/navigation";
 import { CustomError } from "@/middlewares/error/CustomError";
 import { useUserStore } from "../store/user";
+import { useBlogStore } from "../store/blog";
 
 export const useGetBlogs = () => {
   const [loading, setLoading] = useState(false);
@@ -136,9 +137,9 @@ export const useAddBlog = () => {
 export const useEditBlog = () => {
   const routeTo = useRouter();
   const [loading, setloading] = useState(false);
-  const [success, setSuccess] = useState(true);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<CustomError | null>(null);
-  const handleEditBlog = async (id: number, data: EditBlogProp) => {
+  const handleEditBlog = async (id: number, data: EditBlogProps) => {
     try {
       setloading(true);
       await editBlog(id, data);
@@ -156,6 +157,18 @@ export const useEditBlog = () => {
       setloading(false);
     }
   };
+  useEffect(() => {
+    if (success) {
+      setTimeout(() => {
+        setSuccess(false);
+      }, 2000);
+    }
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
+    }
+  }, [error, success, routeTo]);
   return { handleEditBlog, loading, error, success };
 };
 
@@ -249,4 +262,37 @@ export const useGetUserBlogs = () => {
     }
   };
   return { handleGetUserBlogs, loading, error, success };
+};
+
+export const useGetBlogForEdit = () => {
+  const blogStore = useBlogStore((state) => state.setBlog);
+  const routeTo = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<CustomError | null>(null);
+
+  const handleGetBlogForEdit = async (id: number) => {
+    setLoading(true);
+    try {
+      const blogData = await getBlogForEdit(id);
+      blogStore({
+        ...blogData,
+        image: blogData.image ?? null,
+      });
+      setError(null);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          routeTo.push("/login");
+        }
+        setError(error);
+      } else {
+        setError(
+          new CustomError("An unknown error occurred while fetching blog", 400)
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  return { handleGetBlogForEdit, loading, error };
 };

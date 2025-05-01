@@ -1,5 +1,8 @@
-import { updateBlogParams } from "@/app/types";
+import { EditBlogProps } from "@/app/types";
+import { sanitizeRequestBody } from "@/app/utils";
+import { rateLimit } from "@/app/utils/redis";
 import { initializeDatabase } from "@/config/dbInit";
+import { CustomError } from "@/middlewares/error/CustomError";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
 import { doesUserExist } from "@/services/authServices";
 import {
@@ -12,11 +15,15 @@ interface Props {
   params: { id: number };
 }
 export const GET = async (req: NextRequest, { params }: Props) => {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     const userId = req.headers.get("X-User-Id") as string;
     await initializeDatabase();
     const blogData = await getBlogService(params.id, +userId);
-    console.log(blogData.get());
     return NextResponse.json(blogData.get());
   } catch (error) {
     return errorHandler(error, req);
@@ -24,7 +31,12 @@ export const GET = async (req: NextRequest, { params }: Props) => {
 };
 
 export const DELETE = async (req: NextRequest, { params }: Props) => {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     console.log("inside delete blog route");
     const userId = req.headers.get("X-User-Id") as string;
     console.log(userId);
@@ -38,11 +50,21 @@ export const DELETE = async (req: NextRequest, { params }: Props) => {
 };
 
 export const PUT = async (req: NextRequest, { params }: Props) => {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
-    const body = (await req.json()) as updateBlogParams;
-    const userId = req.headers.get("X-User-Id") as string;
+    const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     await initializeDatabase();
-    const updatedBlog = await updateBlogService(+params.id, +userId, body);
+    const userId = req.headers.get("X-User-Id") as string;
+    await doesUserExist(+userId);
+    const sentizedData = (await sanitizeRequestBody(req)) as EditBlogProps;
+    const updatedBlog = await updateBlogService(
+      +params.id,
+      +userId,
+      sentizedData
+    );
     return NextResponse.json(updatedBlog);
   } catch (error) {
     return errorHandler(error, req);

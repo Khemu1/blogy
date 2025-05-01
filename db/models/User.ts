@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import sequelize from "@/config/db";
 import { DataTypes, Model, Optional } from "sequelize";
-import Comment from "./Comment";
 
 interface UserCreationAttributes
   extends Optional<UserModel, "id" | "createdAt" | "updatedAt" | "deletedAt"> {}
@@ -22,10 +21,7 @@ class User
     return bcrypt.hashSync(password, 10);
   }
 
-  static associate() {
-    User.hasMany(Comment, { foreignKey: "userId" });
-    Comment.belongsTo(User, { foreignKey: "userId" });
-  }
+
 }
 
 User.init(

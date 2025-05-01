@@ -51,9 +51,12 @@ const MyBlog: React.FC<{
       </Link>
 
       <div className="flex gap-2 items-start sm:items-center flex-shrink-0">
-        <button className="bg-blue-500 text-white px-2 py-1 rounded-lg text-sm">
+        <Link
+          href={`/blogs/edit/${blog.id}`}
+          className="bg-blue-500 text-white px-2 py-1 rounded-lg text-sm"
+        >
           Edit
-        </button>
+        </Link>
         <button
           className="bg-red-600 text-white px-2 py-1 rounded-lg text-sm"
           onClick={handleDelete}

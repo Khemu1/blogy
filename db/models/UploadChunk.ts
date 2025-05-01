@@ -1,7 +1,5 @@
-import bcrypt from "bcrypt";
 import sequelize from "@/config/db";
 import { DataTypes, Model, Optional } from "sequelize";
-import Upload from "./Upload";
 
 export interface UploadChunkModel {
   id: number;
@@ -23,10 +21,6 @@ class UploadChunk
   declare readonly chunk_length: number;
   declare readonly offset: number;
   declare created_at: Date;
-
-  static associate() {
-    UploadChunk.belongsTo(Upload, { foreignKey: "upload_id" });
-  }
 }
 
 UploadChunk.init(

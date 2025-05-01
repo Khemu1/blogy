@@ -38,9 +38,10 @@ export interface NewBlogProp {
   content: string;
   imageId: string | null;
 }
-export interface EditBlogProp {
-  title?: string;
-  content?: string;
+export interface EditBlogProps {
+  title: string;
+  content: string;
+  image: string | null | Upload | undefined;
 }
 
 export interface BlogProps {
@@ -54,10 +55,7 @@ export interface BlogProps {
   user: { username: string };
   comments: CommentProps[];
 }
-export interface updateBlogParams {
-  title: string;
-  content: string;
-}
+
 export interface MyProfileBlogs {
   id: number;
   title: string;
@@ -88,12 +86,6 @@ export interface RegisterErrorProps {
   email?: string;
   password?: string;
   confirmPassword?: string;
-}
-
-export interface BlogErrorProps {
-  message?: string;
-  title?: string;
-  content?: string;
 }
 
 export interface CommentProps {

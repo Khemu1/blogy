@@ -1,9 +1,6 @@
 import sequelize from "@/config/db";
 import { DataTypes, Model, Optional } from "sequelize";
-import Comment from "./Comment";
-import User from "./User";
 import { BlogModel } from "@/app/types";
-import Upload from "./Upload";
 
 interface BlogCreationAttributes
   extends Optional<BlogModel, "id" | "createdAt" | "updatedAt" | "deletedAt"> {}
@@ -19,14 +16,6 @@ class Blog
   declare createdAt: Date;
   declare updatedAt: Date;
   declare deletedAt: Date | null;
-
-  static associate() {
-    Blog.belongsTo(User, { foreignKey: "userId" });
-    User.hasMany(Blog, { foreignKey: "userId" });
-    Blog.hasMany(Comment, { foreignKey: "blogId" });
-    Blog.hasOne(Upload, { foreignKey: "blogId", as: "image" });
-    Upload.belongsTo(Blog, { foreignKey: "blogId", as: "image" });
-  }
 }
 
 Blog.init(
