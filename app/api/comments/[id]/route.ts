@@ -5,6 +5,8 @@ import {
   updateCommentService,
 } from "@/services/commentServices";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
+import { sanitizeRequestBody } from "@/app/utils";
+import { doesUserExist } from "@/services/authServices";
 
 interface Props {
   params: { id: number };
@@ -12,7 +14,7 @@ interface Props {
 export const DELETE = async (req: NextRequest, { params }: Props) => {
   try {
     const userId = Number(req.headers.get("X-User-Id"));
-    console.log(userId);
+    await doesUserExist(userId);
     await initializeDatabase();
     await deleteCommentService(+params.id, +userId);
     return NextResponse.json({ status: 204 });
@@ -21,17 +23,21 @@ export const DELETE = async (req: NextRequest, { params }: Props) => {
   }
 };
 
-export const PUT = async (req: NextRequest, { params }: Props) => {
+export const PATCH = async (req: NextRequest, { params }: Props) => {
   try {
-    const data: { content: string } = await req.json();
     const userId = Number(req.headers.get("X-User-Id"));
+    await doesUserExist(userId);
+    const sentizedData = (await sanitizeRequestBody(req)) as {
+      content: string;
+      blogId: number;
+    };
     await initializeDatabase();
-    const updatedComment = await updateCommentService(
-      +params.id,
-      +userId,
-      data.content
+    await updateCommentService(+params.id, +userId, sentizedData.content);
+    console.log(
+      "comment updated and returning data back ",
+      sentizedData.content
     );
-    return NextResponse.json(updatedComment);
+    return NextResponse.json(sentizedData.content);
   } catch (error) {
     return errorHandler(error, req);
   }

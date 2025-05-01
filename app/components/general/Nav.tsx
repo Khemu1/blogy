@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useUserStore } from "@/app/store/user";
 import { useRouter } from "next/navigation";
-import { FaBars, FaBlog, FaUserCircle, FaTimes } from "react-icons/fa";
+import { CircleUser, Menu, Rss } from "lucide-react";
 
 const Nav = () => {
   const userStore = useUserStore((state) => state);
@@ -52,7 +52,7 @@ const Nav = () => {
             onClick={handleMenuToggle}
             aria-label="Toggle menu"
           >
-            <FaBars size={24} />
+            <Menu />
           </button>
         </div>
 
@@ -69,7 +69,8 @@ const Nav = () => {
             className="btn bg-[#eb512b] border-none text-white hover:bg-[#d44926] transition-all flex items-center gap-2"
             href="/blogs"
           >
-            <FaBlog /> Blogs
+            <Rss />
+            Blogs
           </Link>
 
           <div className="dropdown dropdown-end">
@@ -82,7 +83,7 @@ const Nav = () => {
               onMouseLeave={() => setIsDropdownOpen(false)}
             >
               <div className="rounded-full">
-                <FaUserCircle size={24} />
+                <CircleUser />{" "}
               </div>
               {userStore.id > 0 && (
                 <span className="text-sm">{userStore.username}</span>
@@ -108,7 +109,7 @@ const Nav = () => {
               href="/blogs"
               onClick={() => setIsMenuOpen(false)}
             >
-              <FaBlog /> Blogs
+              <Rss /> Blogs
             </Link>
 
             <div className="flex justify-center">
@@ -119,7 +120,7 @@ const Nav = () => {
                   setIsMenuOpen(false);
                 }}
               >
-                <FaUserCircle size={24} />
+                <CircleUser size={24} />
                 {userStore.id > 0 && (
                   <span className="text-sm max-w-[75px] truncate">
                     {userStore.username}

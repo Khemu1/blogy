@@ -112,7 +112,7 @@ export const addBlogService = async (blog: NewBlogProp, userId: number) => {
       console.log("We have an image for the blog");
 
       const res = await Upload.update(
-        { blogId: createdBlog.id },
+        { blogId: createdBlog.id, isCompleted: true },
         {
           where: { id: blog.imageId },
         }
@@ -205,30 +205,13 @@ export const getBlogService = async (blogId: number, userId: number) => {
 
 export const deleteBlogService = async (blogId: number, userId: number) => {
   try {
-    if (isNaN(blogId) || blogId < 1) {
-      throw new CustomError(
-        "Invalid ID",
-        400,
-        "Make sure that the ID is valid.",
-        true
-      );
-    }
-
-    const blog = await Blog.findOne({
+    console.log("attempting to delete blog", blogId, userId);
+    await Blog.destroy({
       where: {
         id: blogId,
         userId: userId,
       },
     });
-    if (!blog) {
-      throw new CustomError(
-        "Blog Not Found",
-        404,
-        "The blog post with the specified ID was not found.",
-        true
-      );
-    }
-    await blog.destroy();
   } catch (err) {
     throw err;
   }
@@ -274,5 +257,18 @@ export const updateBlogService = async (
     return modifiedBlog;
   } catch (err) {
     throw err;
+  }
+};
+
+export const getUserBlogsService = async (userId: number) => {
+  try {
+    const blogs = await Blog.findAll({
+      where: { userId: userId },
+      attributes: { include: ["id", "title", "userId"] },
+    });
+    return blogs;
+  } catch (error) {
+    console.log(error);
+    throw error;
   }
 };

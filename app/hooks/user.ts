@@ -1,14 +1,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 import { useUserStoreActions } from "../store/user";
-import {
-  RegisterErrorProps,
-  RegisterFormProps,
-  LoginErrorProps,
-  LoginFormProps,
-  MyInfoProps,
-} from "../types";
-import { isRegisterError, isLoginError } from "../utils/user";
+import { RegisterFormProps, LoginFormProps, UserProps } from "../types";
 import {
   addUser,
   loginUser,
@@ -18,7 +11,7 @@ import {
 import { storeUserData } from "../utils";
 import { CustomError } from "@/middlewares/error/CustomError";
 
-export const authenticatedPaths = ["/blogs/newBlog"];
+export const authenticatedPaths = ["/blogs/newBlog", "/myprofile"];
 
 export const useAddUser = () => {
   const { setUser } = useUserStoreActions();
@@ -76,15 +69,20 @@ export const useLoginUser = () => {
 
 export const useGetMyInfo = () => {
   const router = useRouter();
-  const [data, setData] = useState<MyInfoProps | null>(null);
+  const { setUser } = useUserStoreActions();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Record<string, string> | null>(null);
 
-  const handleGetMyInfo = useCallback(async () => {
+  const handleGetMyInfo = async () => {
     try {
-      setData(await getMyInfo());
+      const data = await getMyInfo();
+      setUser(data);
     } catch (error) {
       if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          console.log("error", error);
+          router.push("/login");
+        }
         setError(error.errors);
       } else {
         setError({ message: "An unknown error occurred while fetching info" });
@@ -93,9 +91,9 @@ export const useGetMyInfo = () => {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  };
 
-  return { handleGetMyInfo, loading, error, data };
+  return { handleGetMyInfo, loading, error };
 };
 
 export const useValidateUser = () => {

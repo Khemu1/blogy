@@ -30,9 +30,16 @@ const Page = () => {
   );
 
   useEffect(() => {
+    const sortBy = searchParams.get("sortBy") ?? "create-d-asc";
+    if (!searchParams.has("sortBy")) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.set("sortBy", sortBy); 
+      window.history.pushState({}, "", newUrl.toString());
+    }
+
     handleGetBlogs(
       searchParams.get("q") ?? "",
-      searchParams.get("sortBy") ?? "",
+      sortBy, 
       searchParams.get("searchBy") ?? "",
       currentPage
     );
@@ -40,7 +47,7 @@ const Page = () => {
 
   if (loading) {
     return (
-      <div className="flex w-full  flex-1 justify-center items-center ">
+      <div className="flex w-full flex-1 justify-center items-center ">
         <span className="loading loading-spinner w-[5rem]"></span>
       </div>
     );

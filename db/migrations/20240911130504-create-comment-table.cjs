@@ -73,7 +73,7 @@ module.exports = {
       {
         indexes: [
           {
-            fields: ["createdAt", "deletedAt", "updatedAt"],
+            fields: ["userId", "blogId"],
           },
         ],
       }

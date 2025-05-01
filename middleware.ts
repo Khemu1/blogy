@@ -7,7 +7,7 @@ import { addCommentMiddleware } from "./middlewares/comments/middleware";
 import { addBlogMiddleware } from "./middlewares/blogs/middleware";
 import { validateUser } from "./middlewares/auth";
 import { sendUserIdIfExists } from "./middlewares/auth/userId";
-import { errorHandler } from "./middlewares/error/ErrorHandler"; // Import your error handler
+import { errorHandler } from "./middlewares/error/ErrorHandler";
 
 export async function middleware(req: NextRequest) {
   try {
@@ -44,13 +44,21 @@ export async function middleware(req: NextRequest) {
       }
       if (req.method === "POST") {
         const userValidationResponse = await validateUser(req);
-        if (!userValidationResponse.ok) return userValidationResponse;
         return await addBlogMiddleware(req, userValidationResponse);
+      }
+      if (req.method === "PUT") {
+        const userValidationResponse = await validateUser(req);
+        return userValidationResponse;
+      }
+      if (req.method === "DELETE") {
+        console.log("inside delete blog middleware");
+        const userValidationResponse = await validateUser(req);
+        return userValidationResponse;
       }
     }
 
-    if (pathname === "/api/users/myInfo") {
-      console.log("yesssss my info");
+    if (pathname.includes("/api/users")) {
+      console.log("user validation");
       return await validateUser(req);
     }
     if (pathname.startsWith("/api/upload")) {
@@ -81,7 +89,7 @@ export const config = {
     "/api/validate-user",
     "/api/blogs/:path*",
     "/api/comments/:path*",
-    "/api/users/myInfo",
+    "/api/users/:path*",
     "/api/upload/process",
     "/api/upload",
     "/api/upload/revert",

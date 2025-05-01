@@ -15,10 +15,7 @@ export interface LoginFormProps {
   emailOrUsername: string;
   password: string;
 }
-export interface MyInfoProps extends UserProps {
-  Blogs: BlogProps[];
-  comments: CommentProps[];
-}
+
 export interface NewUserProps {
   id: number;
   username: string;
@@ -31,7 +28,6 @@ export interface UserProps {
   username: string;
   email: string;
   password: string;
-  roleId?: ROLES;
   createdAt: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
@@ -100,16 +96,13 @@ export interface BlogErrorProps {
   content?: string;
 }
 
-export interface NewCommentProps {
-  content: string;
-}
-
 export interface CommentProps {
   id: number;
   userId: number;
   blogId: number;
   content: string;
   user: { username: string };
+  createdAt: string;
 }
 export interface MyProfileComments {
   id: number;

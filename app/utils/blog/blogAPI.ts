@@ -20,9 +20,9 @@ export const handleResponse = async (response: Response) => {
   return await response.json();
 };
 
-export const getUserBlogs = async (id: number) => {
+export const getUserBlogs = async () => {
   try {
-    const response = await fetch(`/api/users/${id}/blogs/`, {
+    const response = await fetch(`/api/users/blogs`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
@@ -102,6 +102,18 @@ export const deleteUserBlogs = async (blogId: number, userId: number) => {
   try {
     const response = await fetch(`/api/users/${userId}/blogs`, {
       method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getBlogComments = async (blogId: number) => {
+  try {
+    const response = await fetch(`/api/comments/blog/${blogId}`, {
+      method: "GET",
       headers: { "Content-Type": "application/json" },
     });
     return await handleResponse(response);

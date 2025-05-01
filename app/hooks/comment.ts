@@ -1,19 +1,20 @@
-import { CommentErrorProps, NewCommentProps, CommentProps } from "@/app/types";
-import { isCommentError } from "@/app/utils/comment";
+import { CommentProps, MyProfileComments } from "@/app/types";
 import {
   addComment,
-  deleteComment,
   deleteMyComment,
   editMyComment,
-  editUserComment,
   getBlogComments,
+  getUserComments,
 } from "@/app/utils/comment/commentAPI";
+import { CustomError } from "@/middlewares/error/CustomError";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { set } from "zod";
+import { useUserStoreActions } from "../store/user";
 
 export const useAddComment = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<CommentErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
   const [success, setSuccess] = useState(false);
   const handleAddComment = async (blogId: number, content: string) => {
     try {
@@ -21,8 +22,14 @@ export const useAddComment = () => {
       await addComment(blogId, content);
       setSuccess(true);
     } catch (error) {
-      if (isCommentError(error)) setError(error);
-      else setError({ message: "Adding Failed" });
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          router.push("/login");
+        }
+        setError(error.errors);
+      } else {
+        setError({ message: "Adding Failed" });
+      }
     } finally {
       setLoading(false);
     }
@@ -46,86 +53,98 @@ export const useAddComment = () => {
 
 //
 export const useDeleteMyComment = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<CommentErrorProps | null>(null);
+  const router = useRouter();
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Record<string, string> | null>(null);
 
   const handleDeleteMyComment = async (id: number) => {
+    setLoading(true);
     try {
       await deleteMyComment(id);
+      setSuccess(true);
     } catch (error) {
-      if (isCommentError(error)) setError(error);
-      else setError({ message: "Deletion failed" });
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          router.push("/login");
+        }
+        setError(error.errors);
+      } else {
+        setError({ message: "Deletion failed" });
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  return { handleDeleteMyComment, loading, error };
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (success) {
+      timer = setTimeout(() => {
+        setSuccess(false);
+      }, 2000);
+    }
+    if (error) {
+      timer = setTimeout(() => {
+        setError(null);
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [success, error]);
+  return { handleDeleteMyComment, loading, error, success };
 };
 
-export const useDeleteComment = () => {
+export const useEditMyComment = () => {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<CommentErrorProps | null>(null);
-
-  const handleDeleteComment = async (id: number) => {
-    try {
-      setLoading(true);
-      await deleteComment(id);
-    } catch (error) {
-      if (isCommentError(error)) setError(error);
-      else setError({ message: "Deletion failed" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { handleDeleteComment, loading, error };
-};
-
-export const useEditMyComment = async () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<CommentErrorProps | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [data, setData] = useState<string | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
   const handleEditMyComment = async (
     commentId: number,
     blogId: number,
-    comment: NewCommentProps
+    comment: string
   ) => {
     try {
-      await editMyComment(commentId, blogId, comment);
+      setLoading(true);
+      const data = await editMyComment(commentId, blogId, comment);
+      setData(data);
+      console.log("comment updated with data", data);
+      setSuccess(true);
     } catch (error) {
-      if (isCommentError(error)) setError(error);
-      else setError({ message: "Editing failed" });
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          router.push("/login");
+        }
+        setError(error.errors);
+      } else {
+        setError({ message: "Editing failed" });
+      }
     } finally {
       setLoading(false);
     }
   };
-  return { handleEditMyComment, loading, error };
-};
-
-export const useEditUserComment = async () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<CommentErrorProps | null>(null);
-  const handleEditUserComment = async (
-    commentId: number,
-    blogId: number,
-    comment: NewCommentProps
-  ) => {
-    try {
-      await editUserComment(commentId, blogId, comment);
-    } catch (error) {
-      if (isCommentError(error)) setError(error);
-      else setError({ message: "Editing failed" });
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (success) {
+      timer = setTimeout(() => {
+        setSuccess(false);
+      }, 2000);
     }
-  };
-  return { handleEditUserComment, loading, error };
+    if (error) {
+      timer = setTimeout(() => {
+        setError(null);
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [success, error]);
+  return { handleEditMyComment, loading, error, data, success };
 };
 
 export const useGetBlogComments = () => {
   const [comments, setComments] = useState<CommentProps[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<CommentErrorProps | null>(null);
+  const [error, setError] = useState<Record<string, string> | null>(null);
   const [success, setSuccess] = useState(false);
   const handleGetBlogComments = async (blogId: number) => {
     try {
@@ -134,11 +153,38 @@ export const useGetBlogComments = () => {
       setComments(fetchedComments.comments);
       setSuccess(true);
     } catch (error) {
-      if (isCommentError(error)) setError(error);
-      else setError({ message: "Editing failed" });
+      if (error instanceof CustomError) {
+        setError(error.errors);
+      } else {
+        setError({ message: "Editing failed" });
+      }
     } finally {
       setLoading(false);
     }
   };
   return { handleGetBlogComments, loading, error, comments, success };
+};
+
+export const useGetUserComments = () => {
+  const { setMyComments } = useUserStoreActions();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Record<string, string> | null>(null);
+  const [success, setSuccess] = useState(false);
+  const handleGetUserComments = async () => {
+    try {
+      const fetchedComments = await getUserComments();
+
+      setMyComments(fetchedComments);
+      setSuccess(true);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        setError(error.errors);
+      } else {
+        setError({ message: "Editing failed" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  return { handleGetUserComments, loading, error, success };
 };

@@ -1,57 +1,153 @@
 /* styles/blog.module.css */
 
 .markdownPreview_page {
-  will-change: transform;
-  @apply leading-relaxed text-[1.15rem] box-border w-[inherit] h-[inherit];
-}
-.markdownPreview_page > * {
-  will-change: transform;
-}
-.markdownPreview_page h1 {
-  @apply text-2xl;
+  @apply leading-relaxed !text-[1.15rem] !box-border !w-[inherit] !h-[inherit] !important;
+  will-change: transform !important;
+  color: var(--text-primary) !important;
+  line-height: 1.75 !important;
 }
 
-.markdownPreview_page h2 {
-  @apply text-2xl mb-[inherit];
+/* Improved typography scale */
+.markdownPreview_page > h1 {
+  @apply !text-4xl !font-bold !mt-12 !mb-6 !leading-tight !important;
+  color: inherit !important;
+}
+
+.markdownPreview_page > h2 {
+  @apply !text-3xl !font-semibold !mt-10 !mb-5 !leading-snug !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding-bottom: 0.5rem !important;
+  color: inherit !important;
 }
 
 .markdownPreview_page h3 {
-  @apply text-xl mb-[inherit];
+  @apply !text-2xl !font-medium !mt-8 !mb-4 !important;
+  color: inherit !important;
 }
 
 .markdownPreview_page h4 {
-  @apply text-lg mb-[inherit];
+  @apply !text-xl !font-medium !mt-6 !mb-3 !important;
+  color: inherit !important;
 }
 
 .markdownPreview_page h5 {
-  @apply text-base mb-[inherit];
+  @apply !text-lg !font-medium !mt-5 !mb-2.5 !important;
+  color: inherit !important;
 }
 
 .markdownPreview_page h6 {
-  @apply text-sm mb-[inherit];
+  @apply !text-base !font-medium !mt-4 !mb-2 !important;
+  color: inherit !important;
 }
 
+/* Paragraph and text elements */
 .markdownPreview_page p {
-  @apply mb-[inherit] text-[inherit];
+  @apply !my-5 !important;
+  max-width: 80ch !important;
+  color: inherit !important;
 }
 
+.markdownPreview_page strong {
+  @apply !font-semibold !important;
+}
+
+.markdownPreview_page em {
+  @apply !italic !important;
+}
+
+/* Lists with better spacing */
 .markdownPreview_page ul,
 .markdownPreview_page ol {
-  @apply m-0 pl-6;
+  @apply !my-5 !pl-8 !important;
+  color: inherit !important;
 }
 
 .markdownPreview_page li {
-  @apply mb-2;
+  @apply !my-2.5 !important;
+  max-width: 75ch !important;
+  color: inherit !important;
 }
 
+.markdownPreview_page ul {
+  list-style-type: disc !important;
+}
+
+.markdownPreview_page ol {
+  list-style-type: decimal !important;
+}
+
+/* Blockquotes with improved styling */
 .markdownPreview_page blockquote {
-  @apply border-l-2 border-gray-300 pl-4 my-4 text-gray-400;
+  @apply !border-l-4 !border-primary !pl-6 !my-6 !text-gray-600 dark:!text-gray-400 !italic !important;
+  background-color: var(--blockquote-bg) !important;
+}
+
+/* Code blocks and inline code */
+.markdownPreview_page pre {
+  @apply !p-4 !rounded-lg !my-6 !overflow-x-auto !important;
+  background-color: var(--code-bg) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.9em !important;
+  line-height: 1.5 !important;
 }
 
 .markdownPreview_page code {
-  @apply text-sm bg-gray-100 px-2 py-1 rounded;
+  @apply !px-1.5 !py-0.5 !rounded !text-sm !important;
+  font-family: var(--font-mono) !important;
+  background-color: var(--inline-code-bg) !important;
+  color: var(--code-text) !important;
 }
 
-.markdownPreview_page pre {
-  @apply text-sm bg-gray-100 p-4 rounded overflow-x-auto;
+/* Tables */
+.markdownPreview_page table {
+  @apply !my-6 !w-full !border-collapse !important;
+}
+
+.markdownPreview_page th,
+.markdownPreview_page td {
+  @apply !px-4 !py-2 !border !border-gray-200 dark:!border-gray-700 !important;
+  background-color: inherit !important;
+}
+
+.markdownPreview_page th {
+  @apply !bg-gray-100 dark:!bg-gray-800 !font-semibold !text-left !important;
+}
+
+/* Images */
+.markdownPreview_page img {
+  @apply !my-6 !rounded-lg !max-w-full !h-auto !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  background-color: transparent !important;
+}
+
+/* Links */
+.markdownPreview_page a {
+  @apply !text-primary hover:!underline !important;
+  background-color: transparent !important;
+}
+
+/* Horizontal rules */
+.markdownPreview_page hr {
+  @apply !my-8 !border-t !border-gray-200 dark:!border-gray-700 !important;
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .markdownPreview_page {
+    @apply !text-base !important;
+  }
+
+  .markdownPreview_page h1 {
+    @apply !text-3xl !important;
+  }
+
+  .markdownPreview_page h2 {
+    @apply !text-2xl !important;
+  }
+
+  .markdownPreview_page pre {
+    @apply !text-xs !important;
+  }
 }

@@ -29,7 +29,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     checkUserData();
   }, [router]);
   useValidateUser();
-  return <main className="flex flex-col gap-3  flex-1">{children}</main>;
+  return <main className="flex flex-col   flex-1">{children}</main>;
 };
 
 export default Wrapper;

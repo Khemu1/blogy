@@ -1,7 +1,7 @@
-import { up } from "@/db/migrations/20240911130425-create-user-table.cjs";
 import Upload from "@/db/models/Upload";
 import UploadChunk from "@/db/models/UploadChunk";
 import { CustomError } from "@/middlewares/error/CustomError";
+import { Op } from "sequelize";
 
 export const createUpload = async (data: {
   userId: number;
@@ -53,6 +53,20 @@ export const deleteUpload = async (id: string, userId: number) => {
       throw new CustomError("Upload not found", 404);
     }
     return upload;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteUnComplementedUpload = async () => {
+  try {
+    const upload = await Upload.destroy({
+      where: {
+        isCompleted: false,
+        createdAt: { [Op.lt]: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7) },
+      },
+    });
+    console.log("Deleted", upload, "uncomplemented uploads");
   } catch (error) {
     throw error;
   }

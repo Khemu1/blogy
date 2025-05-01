@@ -7,6 +7,10 @@ import { join } from "path";
 import { appendChunkToUpload } from "@/services/helpers/upload";
 import { CustomError } from "@/middlewares/error/CustomError";
 
+type ParsedFormData = {
+  metadata: { name: string; type: string };
+  file: File;
+};
 export const POST = async (req: NextRequest) => {
   try {
     const userIdHeader = req.headers.get("X-User-Id");
@@ -21,7 +25,6 @@ export const POST = async (req: NextRequest) => {
 
     await doesUserExist(userId);
 
-    // Ensure temp directory exists
     const tempPath = join(process.cwd(), "temp");
     mkdirSync(tempPath, { recursive: true });
 
@@ -40,7 +43,6 @@ export const POST = async (req: NextRequest) => {
       fileSize,
     });
 
-    // Handle small file upload directly
     if (fileSize < 500_000 && file) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const chunk = buffer.buffer.slice(
@@ -66,16 +68,8 @@ export const POST = async (req: NextRequest) => {
   }
 };
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
-type ParsedFormData = {
-  metadata: { name: string; type: string };
-  file: File;
-};
+
 
 // for some reason when trying to extract the file from the form data, it's not working
 // had to create this method in order to make it work some how
@@ -110,4 +104,11 @@ const parseFormData = (formData: FormData): ParsedFormData => {
   }
 
   return { metadata, file };
+};
+
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
 };

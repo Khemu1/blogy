@@ -6,6 +6,7 @@ import {
   deleteUserBlogs,
   getBlog,
   deleteBlog,
+  getUserBlogs,
 } from "../utils/blog/blogAPI";
 import {
   AllBlogProps,
@@ -17,6 +18,7 @@ import {
 import { isBlogError } from "@/app/utils/blog";
 import { useRouter } from "next/navigation";
 import { CustomError } from "@/middlewares/error/CustomError";
+import { useUserStore } from "../store/user";
 
 export const useGetBlogs = () => {
   const [loading, setLoading] = useState(false);
@@ -112,12 +114,12 @@ export const useAddBlog = () => {
     }
   };
   useEffect(() => {
-    // if (success) {
-    //   setTimeout(() => {
-    //     setSuccess(false);
-    //     routeTo.push(`/blogs/${blogId?.blogId}`);
-    //   }, 2000);
-    // }
+    if (success) {
+      setTimeout(() => {
+        setSuccess(false);
+        routeTo.push(`/blogs/${blogId?.blogId}`);
+      }, 2000);
+    }
     if (error) {
       setTimeout(() => {
         setError(null);
@@ -157,6 +159,7 @@ export const useEditBlog = () => {
 
 export const useDeleteBlog = () => {
   const routeTo = useRouter();
+  const [success, setSuccess] = useState(false);
   const [loading, setloading] = useState(false);
   const [error, setError] = useState<Record<string, string> | null>(null);
 
@@ -164,6 +167,7 @@ export const useDeleteBlog = () => {
     try {
       setloading(true);
       await deleteBlog(blogId);
+      setSuccess(true);
     } catch (error) {
       if (error instanceof CustomError) {
         if (error.statusCode === 401 || error.statusCode === 403) {
@@ -179,7 +183,21 @@ export const useDeleteBlog = () => {
       setloading(false);
     }
   };
-  return { handleDeleteBlog, loading, error };
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (success) {
+      timer = setTimeout(() => {
+        setSuccess(false);
+      }, 2000);
+    }
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [success, error]);
+  return { handleDeleteBlog, loading, error, success };
 };
 
 export const useDeleteUserBlogs = () => {
@@ -207,4 +225,31 @@ export const useDeleteUserBlogs = () => {
     }
   };
   return { handleLoginUser, loading, error, blogs };
+};
+
+export const useGetUserBlogs = () => {
+  const routeTo = useRouter();
+  const { setMyBlogs } = useUserStore();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Record<string, string> | null>(null);
+  const [success, setSuccess] = useState(false);
+  const handleGetUserBlogs = async () => {
+    try {
+      const fetchedBlogs = await getUserBlogs();
+      setMyBlogs(fetchedBlogs);
+      setSuccess(true);
+    } catch (error) {
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          routeTo.push("/login");
+        }
+        setError(error.errors);
+      } else {
+        setError({ message: "Editing failed" });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  return { handleGetUserBlogs, loading, error, success };
 };

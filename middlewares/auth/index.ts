@@ -20,6 +20,7 @@ export async function validateUser(req: NextRequest) {
       const response = NextResponse.next();
       response.headers.set("X-User-Id", accessTokenData.id as string);
       response.cookies.set("X-User-Id", accessTokenData.id as string);
+      console.log("user is authenticated");
 
       return response;
     }
@@ -39,7 +40,7 @@ export async function validateUser(req: NextRequest) {
       response.cookies.set("accessToken", newAccessToken, { path: "/" });
       response.cookies.set("X-User-Id", refreshTokenData.id as string);
       response.headers.set("X-User-Id", refreshTokenData.id as string);
-
+      console.log("user is authenticated");
       return response;
     }
 

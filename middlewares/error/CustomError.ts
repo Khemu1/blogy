@@ -33,7 +33,7 @@ class CustomError extends Error {
 const sendDevError = (error: CustomError) => {
   const { statusCode, status, message, stack, type, details, errors } = error;
   return NextResponse.json(
-    { message, status, details, stack, type, errors },
+    { message, status, details, statusCode, stack, type, errors },
     { status: statusCode }
   );
 };
@@ -43,14 +43,20 @@ const sendProdError = (error: CustomError) => {
 
   if (safe) {
     return NextResponse.json(
-      { message, status, type, details, errors },
+      { message, status, type, statusCode, details, errors },
       {
         status: statusCode,
       }
     );
   }
   return NextResponse.json(
-    { message: "Something went wrong", status: "error", type, errors },
+    {
+      message: "Something went wrong",
+      statusCode: 500,
+      status: "error",
+      type,
+      errors,
+    },
     { status: 500 }
   );
 };

@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 @layer base {
   h1 {
     @apply text-4xl font-bold;
@@ -35,6 +34,7 @@ body {
   display: flex;
   min-height: 100dvh;
   min-width: 100dvw;
+  overflow-x: hidden;
 }
 input {
   @apply px-2 py-1 rounded-lg  border-b-4 transition-all;
@@ -117,12 +117,4 @@ textarea:focus {
 .account_info {
   display: grid;
   grid: 1fr 1fr / 1fr;
-}
-
-.markdownPreview_page pre {
-  @apply !bg-[#20252e] text-white p-4 rounded-lg;
-}
-
-.markdownPreview_page code {
-  @apply !text-white !bg-transparent;
 }

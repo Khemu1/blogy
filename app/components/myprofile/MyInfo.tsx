@@ -1,8 +1,7 @@
-import { MyInfoProps, UserProps } from "@/app/types";
+import { UserProps } from "@/app/types";
 import React from "react";
 
 const MyInfo: React.FC<{ data: UserProps }> = ({ data }) => {
-  console.log(data);
   return (
     <div className="flex flex-col justify-around h-full">
       <div className="account_info   mb-4">

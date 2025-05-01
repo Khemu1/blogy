@@ -13,6 +13,7 @@ const BlogEditDialog: React.FC<{ blogId: number }> = ({ blogId }) => {
   const [data, setData] = useState<NewBlogProp>({
     title: "",
     content: "",
+    imageId: null,
   });
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
   const [sanitizedContent, setSanitizedContent] = useState<string>("");

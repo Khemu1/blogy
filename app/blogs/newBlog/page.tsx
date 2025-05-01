@@ -10,7 +10,7 @@ import { useUserStore } from "@/app/store/user";
 import { useRouter } from "next/navigation";
 import FileUploader from "@/app/components/blog/FileUploader";
 import { validateWithSchema } from "@/app/utils/comment";
-import { Loader, CheckCircle } from "lucide-react";
+import { Loader, CheckCircle, Eye } from "lucide-react";
 
 const NewBlog = () => {
   const userStore = useUserStore();
@@ -45,14 +45,6 @@ const NewBlog = () => {
     }
   };
 
-  const openPreview = () => {
-    if (!previewWindow || previewWindow.closed) {
-      const newWindow = window.open("", "_blank", "width=800,height=600");
-      setPreviewWindow(newWindow);
-    }
-    setShowPreview(true);
-  };
-
   const handleImageUpload = (url: string, file: File) => {
     console.log("adding image", url, file);
     setData((prev) => ({ ...prev, imageId: url }));
@@ -79,101 +71,6 @@ const NewBlog = () => {
   }, [data.content, data.title]);
 
   useEffect(() => {
-    const updatePreviewWindow = () => {
-      if (previewWindow && !previewWindow.closed) {
-        previewWindow.document.body.innerHTML = `
-        <html>
-          <head>
-            <title>${sanitizedTitle || "Preview"}</title>
-            <link href="/app/globals.css" rel="stylesheet">
-            <style>
-              body {
-                background-color: #2a303c;
-                color: white;
-                padding: 2rem;
-                max-width: 1200px;
-                margin: 0 auto;
-              }
-              .preview-container {
-                background: #20252e;
-                border-radius: 0.5rem;
-                padding: 2rem;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-              }
-              .preview-title {
-                font-size: 2rem;
-                font-weight: bold;
-                margin-bottom: 1.5rem;
-                color: #f3f4f6;
-                border-bottom: 2px solid #374151;
-                padding-bottom: 0.5rem;
-              }
-              .preview-image {
-                width: 100%;
-                max-height: 400px;
-                object-fit: cover;
-                border-radius: 0.5rem;
-                margin-bottom: 1.5rem;
-              }
-              .prose {
-                line-height: 1.6;
-              }
-              .prose img {
-                max-width: 100%;
-                height: auto;
-                border-radius: 0.25rem;
-              }
-              .prose h2 {
-                font-size: 1.5rem;
-                font-weight: 600;
-                margin-top: 2rem;
-                margin-bottom: 1rem;
-                color: #f3f4f6;
-              }
-              .prose p {
-                margin-bottom: 1rem;
-              }
-              .prose a {
-                color: #60a5fa;
-                text-decoration: underline;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="preview-container">
-              ${
-                file
-                  ? `<img src="${URL.createObjectURL(
-                      file
-                    )}" class="preview-image" alt="Blog header image" />`
-                  : ""
-              }
-              <h1 class="preview-title">${
-                sanitizedTitle || "Your title will appear here"
-              }</h1>
-              <div class="prose prose-lg break-words max-w-full">
-                ${sanitizedContent || "Your content will appear here"}
-              </div>
-            </div>
-          </body>
-        </html>
-      `;
-      }
-    };
-    updatePreviewWindow();
-  }, [sanitizedContent, sanitizedTitle, previewWindow, data.imageId]);
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }, [data.content]);
-
-  useEffect(() => {
     if (userStore.id < 1) {
       const timeout = setTimeout(() => {
         routeTo.push("/blogs");
@@ -183,13 +80,12 @@ const NewBlog = () => {
   }, [userStore.id, routeTo]);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 md:p-6">
+    <div className="w-full max-w-[700px] sm:max-w-[90%] md:max-w-[600px] lg:max-w-[900px] xl:max-w-[1100px] mx-auto p-4 md:p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">
         Create New Blog Post
       </h1>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Editor Section */}
+      <div className="flex flex-col w-full lg:flex-row gap-8">
         <div className="flex-1">
           <form
             className="bg-base-300 p-6 rounded-lg shadow-lg"
@@ -243,8 +139,7 @@ const NewBlog = () => {
                 onChange={(e) =>
                   setData((prev) => ({ ...prev, content: e.target.value }))
                 }
-                ref={textareaRef}
-                className="w-full p-3  rounded-md focus:outline-0  dark:text-white min-h-[200px]"
+                className="w-full p-3  rounded-md focus:outline-0  text-white h-[600px] overflow-y-scroll"
                 rows={10}
               />
               {errors?.content && (
@@ -255,22 +150,10 @@ const NewBlog = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
               <button
                 type="button"
-                onClick={openPreview}
+                onClick={() => setShowPreview(true)}
                 className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path
-                    fillRule="evenodd"
-                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                <Eye className="h-5 w-5" />
                 Preview
               </button>
 
@@ -359,6 +242,52 @@ const NewBlog = () => {
           </div>
         )}
       </div>
+      <dialog
+        id="preview-modal"
+        className={`modal ${showPreview ? "modal-open" : ""}`}
+        onClick={() => setShowPreview(false)}
+      >
+        <div
+          className="modal-box max-w-6xl h-[90vh] max-h-[800px] overflow-y-auto"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex justify-between items-center mb-4  bg-base-100 pt-4 pb-2 z-10">
+            <h2 className="text-2xl font-bold">Blog Preview</h2>
+            <button
+              onClick={() => setShowPreview(false)}
+              className="btn btn-sm btn-circle"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="prose dark:prose-invert max-w-none">
+            {file && (
+              <div className="relative w-full h-[320px] !rounded-lg overflow-hidden mb-6">
+                <Image
+                  src={URL.createObjectURL(file)}
+                  alt="Blog header preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+            <h1 className="text-4xl font-bold mb-6">
+              {data.title || "Your title will appear here"}
+            </h1>
+            <div
+              className="prose dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{
+                __html:
+                  sanitizedContent || "<p>Your content will appear here</p>",
+              }}
+            />
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
     </div>
   );
 };

@@ -5,31 +5,13 @@ import { CustomError } from "@/middlewares/error/CustomError";
 
 const getMyData = async (userId: number) => {
   try {
-    console.log("userId", userId);
-    if (isNaN(userId) || userId < 1) {
-      throw new CustomError("invalid user id", 401, "try to login again", true);
-    }
     const userData = await User.findByPk(userId, {
-      include: [
-        {
-          model: Blog,
-          attributes: {
-            exclude: ["deletedAt", "userId"],
-          },
-        },
-        {
-          model: Comment,
-          attributes: {
-            exclude: ["deletedAt", "userId"],
-          },
-        },
-      ],
       attributes: {
         exclude: ["password"],
       },
     });
     if (!userData) {
-      throw new CustomError("user not found", 404, "try again", true);
+      throw new CustomError("user not found", 403, "try again", true);
     }
     return userData.get();
   } catch (error) {

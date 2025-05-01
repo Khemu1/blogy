@@ -65,7 +65,7 @@ const BlogCard: React.FC<{ cardData: AllBlogProps }> = ({ cardData }) => {
             }
             alt={cardData.title}
             fill
-            className="object-cover transition-opacity duration-300"
+            className="object-cover transition-opacity duration-300 "
             style={{ opacity: isHovered ? 0.9 : 1 }}
           />
         </div>

@@ -1,6 +1,7 @@
 import { updateBlogParams } from "@/app/types";
 import { initializeDatabase } from "@/config/dbInit";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
+import { doesUserExist } from "@/services/authServices";
 import {
   deleteBlogService,
   getBlogService,
@@ -24,8 +25,10 @@ export const GET = async (req: NextRequest, { params }: Props) => {
 
 export const DELETE = async (req: NextRequest, { params }: Props) => {
   try {
+    console.log("inside delete blog route");
     const userId = req.headers.get("X-User-Id") as string;
     console.log(userId);
+    await doesUserExist(+userId);
     await initializeDatabase();
     await deleteBlogService(params.id, +userId);
     return NextResponse.json({ status: 204 });
