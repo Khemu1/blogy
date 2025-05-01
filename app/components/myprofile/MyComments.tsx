@@ -2,34 +2,26 @@ import { FC, useEffect, useState } from "react";
 import MyComment from "./MyComment";
 import { useGetUserComments } from "@/app/hooks/comment";
 import { useUserStore } from "@/app/store/user";
+import { useToast } from "@/app/store/toast";
 
 const MyComments: FC = () => {
+  const { setToast } = useToast();
   const { handleGetUserComments, loading, error } = useGetUserComments();
   const myComments = useUserStore((state) => state.myComments);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastType, setToastType] = useState<"success" | "error" | null>(null);
 
-  const showToast = (msg: string, type: "success" | "error") => {
-    setToastMessage(msg);
-    setToastType(type);
-    setTimeout(() => {
-      setToastMessage(null);
-      setToastType(null);
-    }, 3000);
-  };
   useEffect(() => {
     (async () => {
       await handleGetUserComments();
     })();
   }, []);
 
-  if (error) {
-    return (
-      <div className="flex flex-1 items-center justify-center text-xl">
-        Error: {error.message}
-      </div>
-    );
-  }
+
+  useEffect(() => {
+    if (error) {
+      setToast(error.message, "error");
+    }
+  }, [error]);
+
   if (loading) {
     return (
       <div className="flex w-full h-full justify-center items-center m-auto">
@@ -46,20 +38,12 @@ const MyComments: FC = () => {
 
   return (
     <div className="relative h-full">
-      {toastMessage && (
-        <div className="toast z-50">
-          <div className={`alert alert-${toastType}`}>
-            <span>{toastMessage}</span>
-          </div>
-        </div>
-      )}
+
       <div className="flex flex-col gap-5 overflow-x-hidden z-0 max-h-[600px]">
         {commentsArray.map((comment) => (
           <MyComment
             comment={comment}
             key={comment.id}
-            onSuccess={(msg) => showToast(msg, "success")}
-            onError={(msg) => showToast(msg, "error")}
           />
         ))}
       </div>

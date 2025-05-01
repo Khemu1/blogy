@@ -4,9 +4,11 @@ import { useGetBlogs } from "@/app/hooks/blog";
 import { useCallback, useEffect, useState } from "react";
 import { BlogCard, Header, Pagination } from "../components/index";
 import { useSearchParams } from "next/navigation";
+import { useToast } from "../store/toast";
 
 const Page = () => {
-  const { loading, data, handleGetBlogs } = useGetBlogs();
+  const { setToast } = useToast();
+  const { loading, data, handleGetBlogs, error } = useGetBlogs();
   const searchParams = useSearchParams();
 
   const [currentPage, setCurrentPage] = useState(
@@ -33,18 +35,22 @@ const Page = () => {
     const sortBy = searchParams.get("sortBy") ?? "create-d-asc";
     if (!searchParams.has("sortBy")) {
       const newUrl = new URL(window.location.href);
-      newUrl.searchParams.set("sortBy", sortBy); 
+      newUrl.searchParams.set("sortBy", sortBy);
       window.history.pushState({}, "", newUrl.toString());
     }
 
     handleGetBlogs(
       searchParams.get("q") ?? "",
-      sortBy, 
+      sortBy,
       searchParams.get("searchBy") ?? "",
       currentPage
     );
   }, [handleGetBlogs, searchParams, currentPage]);
-
+  useEffect(() => {
+    if (error) {
+      setToast(error.message, "error");
+    }
+  }, [error]);
   if (loading) {
     return (
       <div className="flex w-full flex-1 justify-center items-center ">

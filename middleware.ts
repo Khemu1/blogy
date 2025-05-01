@@ -58,18 +58,15 @@ export async function middleware(req: NextRequest) {
     }
 
     if (pathname.includes("/api/users")) {
-      console.log("user validation");
       return await validateUser(req);
     }
     if (pathname.startsWith("/api/upload")) {
-      // Handle upload process
       const userValidationResponse = await validateUser(req);
       if (!userValidationResponse.ok) return userValidationResponse;
       return userValidationResponse;
     }
     if (pathname.startsWith("/api/validate-user")) {
       if (req.method === "GET") {
-        // Handle upload process
         const userValidationResponse = await validateUser(req);
         return userValidationResponse;
       }

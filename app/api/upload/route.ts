@@ -3,9 +3,16 @@ import { errorHandler } from "@/middlewares/error/ErrorHandler";
 import { createUploadChunk } from "@/services/uploadServices";
 import { doesUserExist } from "@/services/authServices";
 import { appendChunkToUpload } from "@/services/helpers/upload";
+import { rateLimit } from "@/app/utils/redis";
+import { CustomError } from "@/middlewares/error/CustomError";
 
 export const PATCH = async (req: NextRequest) => {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const { success } = await rateLimit(`rate_limit:${ip}`, 1000, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     const userId = req.headers.get("X-User-Id") as string;
     await doesUserExist(+userId);
     const url = req.url;

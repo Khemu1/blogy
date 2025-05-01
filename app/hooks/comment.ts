@@ -14,7 +14,7 @@ import { useUserStoreActions } from "../store/user";
 export const useAddComment = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Record<string, string> | null>(null);
+  const [error, setError] = useState<CustomError | null>(null);
   const [success, setSuccess] = useState(false);
   const handleAddComment = async (blogId: number, content: string) => {
     try {
@@ -26,9 +26,9 @@ export const useAddComment = () => {
         if (error.statusCode === 401 || error.statusCode === 403) {
           router.push("/login");
         }
-        setError(error.errors);
+        setError(error);
       } else {
-        setError({ message: "Adding Failed" });
+        setError(new CustomError("An unknown login error occurred", 400));
       }
     } finally {
       setLoading(false);
@@ -56,7 +56,7 @@ export const useDeleteMyComment = () => {
   const router = useRouter();
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Record<string, string> | null>(null);
+  const [error, setError] = useState<CustomError | null>(null);
 
   const handleDeleteMyComment = async (id: number) => {
     setLoading(true);
@@ -68,9 +68,9 @@ export const useDeleteMyComment = () => {
         if (error.statusCode === 401 || error.statusCode === 403) {
           router.push("/login");
         }
-        setError(error.errors);
+        setError(error);
       } else {
-        setError({ message: "Deletion failed" });
+        setError(new CustomError("An unknown login error occurred", 400));
       }
     } finally {
       setLoading(false);
@@ -99,7 +99,7 @@ export const useEditMyComment = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [data, setData] = useState<string | null>(null);
-  const [error, setError] = useState<Record<string, string> | null>(null);
+  const [error, setError] = useState<CustomError | null>(null);
   const handleEditMyComment = async (
     commentId: number,
     blogId: number,
@@ -116,9 +116,9 @@ export const useEditMyComment = () => {
         if (error.statusCode === 401 || error.statusCode === 403) {
           router.push("/login");
         }
-        setError(error.errors);
+        setError(error);
       } else {
-        setError({ message: "Editing failed" });
+        setError(new CustomError("An unknown login error occurred", 400));
       }
     } finally {
       setLoading(false);
@@ -168,7 +168,7 @@ export const useGetBlogComments = () => {
 export const useGetUserComments = () => {
   const { setMyComments } = useUserStoreActions();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Record<string, string> | null>(null);
+  const [error, setError] = useState<CustomError | null>(null);
   const [success, setSuccess] = useState(false);
   const handleGetUserComments = async () => {
     try {
@@ -178,9 +178,9 @@ export const useGetUserComments = () => {
       setSuccess(true);
     } catch (error) {
       if (error instanceof CustomError) {
-        setError(error.errors);
+        setError(error);
       } else {
-        setError({ message: "Editing failed" });
+        setError(new CustomError("An unknown login error occurred", 400));
       }
     } finally {
       setLoading(false);

@@ -60,10 +60,10 @@ const Login = () => {
               }}
             />
           </div>
-          {(errors?.emailOrUsername || ApiError?.emailOrUsername) && (
+          {(errors?.emailOrUsername || ApiError?.errors.emailOrUsername) && (
             <div className="flex">
               <small className={styles.error}>
-                {errors?.emailOrUsername ?? ApiError?.emailOrUsername}
+                {errors?.emailOrUsername ?? ApiError?.errors.emailOrUsername}
               </small>
             </div>
           )}
@@ -76,7 +76,7 @@ const Login = () => {
               id="password"
               className={`form_input 
                 ${
-                  errors?.password || ApiError?.password
+                  errors?.password || ApiError?.errors.password
                     ? styles.error_bottom_border
                     : ""
                 }`}
@@ -89,10 +89,10 @@ const Login = () => {
               }}
             />
           </div>
-          {(errors?.password || ApiError?.password) && (
+          {(errors?.password || ApiError?.errors.password) && (
             <div className="flex ">
               <small className={styles.error}>
-                {errors?.password ?? ApiError?.password}
+                {errors?.password ?? ApiError?.errors.password}
               </small>
             </div>
           )}
@@ -105,7 +105,7 @@ const Login = () => {
           Login
         </button>
 
-        {ApiError?.message && (
+        {ApiError?.errors.message && (
           <p className={styles.login_error}>{ApiError.message}</p>
         )}
 

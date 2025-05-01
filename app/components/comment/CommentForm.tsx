@@ -4,11 +4,13 @@ import { getCommentSchema, validateWithSchema } from "@/app/utils/comment";
 import { useEffect, useRef, useState } from "react";
 import { ZodError } from "zod";
 import { Loader2, CheckCircle } from "lucide-react";
+import { useToast } from "@/app/store/toast";
 
 const CommentForm: React.FC<{
   blogId: number;
   refetchComments: (blogId: number) => Promise<void>;
 }> = ({ blogId, refetchComments }) => {
+  const { setToast } = useToast();
   const [data, setData] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
   const {
@@ -48,6 +50,11 @@ const CommentForm: React.FC<{
   }, [data]);
 
   useEffect(() => {
+    if (APIError) {
+      setToast(APIError.message, "error");
+    }
+  }, [APIError]);
+  useEffect(() => {
     if (success) {
       setData("");
       refetchComments(blogId);
@@ -71,15 +78,19 @@ const CommentForm: React.FC<{
             onChange={(e) => setData(e.target.value)}
             placeholder="Share your thoughts..."
             className={`w-full px-4 py-3 border ${
-              errors?.content || APIError?.content
+              errors?.content || APIError?.errors.content
                 ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                 : ""
             } rounded-lg shadow-sm focus:outline-0 bg-base-100 text-white border-b-4`}
             rows={4}
           />
-          {(APIError?.content || APIError?.message || errors?.content) && (
+          {(APIError?.errors.content ||
+            APIError?.errors.message ||
+            errors?.content) && (
             <p className="mt-2 text-sm text-red-600">
-              {errors?.content ?? APIError?.content ?? APIError?.message}
+              {errors?.content ??
+                APIError?.errors.content ??
+                APIError?.errors.message}
             </p>
           )}
         </div>

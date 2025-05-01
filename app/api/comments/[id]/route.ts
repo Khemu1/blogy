@@ -7,12 +7,19 @@ import {
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
 import { sanitizeRequestBody } from "@/app/utils";
 import { doesUserExist } from "@/services/authServices";
+import { rateLimit } from "@/app/utils/redis";
+import { CustomError } from "@/middlewares/error/CustomError";
 
 interface Props {
   params: { id: number };
 }
 export const DELETE = async (req: NextRequest, { params }: Props) => {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     const userId = Number(req.headers.get("X-User-Id"));
     await doesUserExist(userId);
     await initializeDatabase();
@@ -24,7 +31,12 @@ export const DELETE = async (req: NextRequest, { params }: Props) => {
 };
 
 export const PATCH = async (req: NextRequest, { params }: Props) => {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     const userId = Number(req.headers.get("X-User-Id"));
     await doesUserExist(userId);
     const sentizedData = (await sanitizeRequestBody(req)) as {

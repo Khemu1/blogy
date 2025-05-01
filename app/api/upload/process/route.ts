@@ -6,13 +6,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { join } from "path";
 import { appendChunkToUpload } from "@/services/helpers/upload";
 import { CustomError } from "@/middlewares/error/CustomError";
+import { rateLimit } from "@/app/utils/redis";
 
 type ParsedFormData = {
   metadata: { name: string; type: string };
-  file: File;
+  file: File | null;
 };
 export const POST = async (req: NextRequest) => {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     const userIdHeader = req.headers.get("X-User-Id");
     if (!userIdHeader) {
       throw new CustomError("Missing user ID header", 400);
@@ -33,6 +39,8 @@ export const POST = async (req: NextRequest) => {
 
     const fileSize = Number(req.headers.get("Content-Length"));
     if (!fileSize || isNaN(fileSize)) {
+      console.log(fileSize);
+      console.log("file size is not a number");
       return NextResponse.json({ error: "Invalid file size" }, { status: 400 });
     }
 
@@ -44,6 +52,9 @@ export const POST = async (req: NextRequest) => {
     });
 
     if (fileSize < 500_000 && file) {
+      if (!file) {
+        throw new CustomError("File is required when size is small", 400);
+      }
       const buffer = Buffer.from(await file.arrayBuffer());
       const chunk = buffer.buffer.slice(
         buffer.byteOffset,
@@ -67,9 +78,6 @@ export const POST = async (req: NextRequest) => {
     return errorHandler(error, req);
   }
 };
-
-
-
 
 // for some reason when trying to extract the file from the form data, it's not working
 // had to create this method in order to make it work some how
@@ -99,13 +107,9 @@ const parseFormData = (formData: FormData): ParsedFormData => {
   if (!metadata) {
     throw new CustomError("Metadata is required", 400);
   }
-  if (!file) {
-    throw new CustomError("File is required", 400);
-  }
 
   return { metadata, file };
 };
-
 
 export const config = {
   api: {

@@ -8,9 +8,16 @@ import {
 import { loginUserService } from "@/services/authServices";
 import { errorHandler } from "@/middlewares/error/ErrorHandler";
 import { LoginFormProps } from "@/app/types";
+import { rateLimit } from "@/app/utils/redis";
+import { CustomError } from "@/middlewares/error/CustomError";
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
+    if (!success) {
+      throw new CustomError("Too many requests", 429);
+    }
     const data = (await req.json()) as LoginFormProps;
     await initializeDatabase();
     const user = await loginUserService(data);

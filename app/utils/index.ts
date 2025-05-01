@@ -1,7 +1,6 @@
 import DOMPurify from "dompurify";
 import { NextRequest } from "next/server";
 import { CustomError } from "@/middlewares/error/CustomError";
-
 export async function sanitizeRequestBody(req: NextRequest) {
   const data = await req.json();
 
@@ -43,3 +42,4 @@ export const storeUserData = (data: { id: number; name: string }) => {
     localStorage.setItem("userData", JSON.stringify(data));
   }
 };
+

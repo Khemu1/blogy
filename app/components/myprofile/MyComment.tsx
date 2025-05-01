@@ -4,12 +4,12 @@ import { FC, useEffect, useState } from "react";
 import { Edit2, Trash2, X, Loader2 } from "lucide-react";
 import { useDeleteMyComment, useEditMyComment } from "@/app/hooks/comment";
 import { useUserStore } from "@/app/store/user";
+import { useToast } from "@/app/store/toast";
 
 const MyComment: FC<{
   comment: MyProfileComments;
-  onSuccess: (message: string) => void;
-  onError: (message: string) => void;
-}> = ({ comment, onSuccess, onError }) => {
+}> = ({ comment }) => {
+  const { setToast } = useToast();
   const { editComment, deleteComment } = useUserStore();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
@@ -52,22 +52,23 @@ const MyComment: FC<{
 
   useEffect(() => {
     if (editSuccess && data) {
+      setToast("Comment updated successfully!", "success");
       editComment(comment.id, data);
       setIsEditModalOpen(false);
       setEditedContent(data);
     }
     if (editError) {
-      onError(editError.message || "Failed to edit comment");
+      setToast(editError.message, "error");
     }
   }, [editSuccess, editError]);
 
   useEffect(() => {
-    if (deleteSuccess) {
-      onSuccess("Comment deleted successfully!");
-      deleteComment(comment.id);
-    }
     if (deleteError) {
-      onError(deleteError.message || "Failed to delete comment");
+      setToast(deleteError.message, "error");
+    }
+    if (deleteSuccess) {
+      setToast("Comment deleted successfully!", "success");
+      deleteComment(comment.id);
     }
   }, [deleteSuccess, deleteError]);
 

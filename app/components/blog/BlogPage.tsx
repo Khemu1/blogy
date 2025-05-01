@@ -7,6 +7,7 @@ import { CommentForm, Comment } from "../../components";
 import { BlogProps, CommentProps } from "@/app/types";
 import { useGetBlogComments } from "@/app/hooks/comment";
 import Image from "next/image";
+import { useToast } from "@/app/store/toast";
 
 interface BlogPageProps {
   blogData: BlogProps;
@@ -14,6 +15,8 @@ interface BlogPageProps {
 }
 
 const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
+  const { setToast } = useToast();
+  console.log(blogData);
   const [allComments, setAllComments] = useState<CommentProps[]>(
     comments || []
   );
@@ -21,6 +24,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
     handleGetBlogComments,
     comments: fetchedComments,
     success,
+    error: apiCommentsError,
   } = useGetBlogComments();
   const [sanitizedTitle, setSanitizedTitle] = useState<string>("");
   const [sanitizedContent, setSanitizedContent] = useState<string>("");
@@ -63,6 +67,12 @@ const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
       setAllComments(fetchedComments);
     }
   }, [success, fetchedComments]);
+
+  useEffect(() => {
+    if (apiCommentsError) {
+      setToast(apiCommentsError.message, "error");
+    }
+  }, [apiCommentsError]);
 
   const blogContent = useMemo(() => {
     if (!blogData) return null;
@@ -131,23 +141,22 @@ const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
     );
   }, [sanitizedTitle, sanitizedContent, blogData]);
 
-  const blogComments = useMemo(
-    () => (
+  const blogComments = useMemo(() => {
+    const comments = allComments || [];
+    return (
       <div className="space-y-6 mt-8">
         <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
-          {allComments.length > 0
-            ? `${allComments.length} Comment${
-                allComments.length !== 1 ? "s" : ""
-              }`
+          {comments.length > 0
+            ? `${comments.length} Comment${comments.length !== 1 ? "s" : ""}`
             : "No comments yet"}
         </h2>
 
-        {allComments.length > 0 ? (
-          allComments.map((comment, index) => (
+        {comments.length > 0 ? (
+          comments.map((comment, index) => (
             <Comment
               key={comment.id ?? index}
               commentData={comment}
-              last={index === allComments.length - 1}
+              last={index === comments.length - 1}
             />
           ))
         ) : (
@@ -158,9 +167,8 @@ const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
           </div>
         )}
       </div>
-    ),
-    [allComments]
-  );
+    );
+  }, [allComments]);
 
   if (error) {
     return (

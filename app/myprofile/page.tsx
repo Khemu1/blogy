@@ -2,18 +2,27 @@
 import { useGetMyInfo } from "@/app/hooks/user";
 import { useEffect, useState } from "react";
 import { MyInfo, MyBlogs, MyComments } from "../components/index";
-import { notFound } from "next/navigation";
 import { useUserStore } from "../store/user";
+import { useToast } from "../store/toast";
 
 const Page = () => {
   const user = useUserStore();
   const [selected, setSelected] = useState<"user_info" | "blogs" | "comments">(
     "user_info"
   );
-  const { loading, handleGetMyInfo } = useGetMyInfo();
+  const { loading, handleGetMyInfo, error } = useGetMyInfo();
+  const { setToast } = useToast();
+
   useEffect(() => {
     handleGetMyInfo();
   }, [user.id]);
+
+  useEffect(() => {
+    if (error) {
+      console.log("error", error);
+      setToast(error.message, "error");
+    }
+  }, [error]);
 
   if (loading) {
     return (
@@ -24,44 +33,25 @@ const Page = () => {
   }
 
   return (
-    <section className="mt-5 flex flex-col  gap-5 h-full px-4 ">
-      <header className="flex  items-center flex-shrink flex-grow-0 w-full ">
-        <div className="flex w-full justify-around items-center  gap-1 rounded-xl">
-          <button
-            value="user_info"
-            className={` w-full cursor-pointer text-center rounded-lg h-[40px] ${
-              selected === "user_info"
-                ? "bg-[#eb512b] text-white"
-                : "bg-base-200"
-            }  transition-all `}
-            onClick={() => setSelected("user_info")}
-          >
-            User Info
-          </button>
-          <button
-            value="blogs"
-            className={` w-full cursor-pointer text-center rounded-lg h-[40px] ${
-              selected === "blogs" ? "bg-[#eb512b] text-white" : "bg-base-200"
-            } transition-all `}
-            onClick={() => setSelected("blogs")}
-          >
-            Blogs
-          </button>
-          <button
-            value="comments"
-            className={`w-full cursor-pointer text-center rounded-lg h-[40px] ${
-              selected === "comments"
-                ? "bg-[#eb512b] text-white"
-                : "bg-base-200"
-            }  transition-all `}
-            onClick={() => setSelected("comments")}
-          >
-            Comments
-          </button>
+    <section className="mt-5 flex flex-col gap-5 h-full px-4">
+      <header className="flex items-center flex-shrink flex-grow-0 w-full">
+        <div className="flex w-full justify-around items-center gap-1 rounded-xl">
+          {["user_info", "blogs", "comments"].map((tab) => (
+            <button
+              key={tab}
+              value={tab}
+              className={`w-full cursor-pointer text-center rounded-lg h-[40px] ${
+                selected === tab ? "bg-[#eb512b] text-white" : "bg-base-200"
+              } transition-all`}
+              onClick={() => setSelected(tab as typeof selected)}
+            >
+              {tab.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
+            </button>
+          ))}
         </div>
       </header>
 
-      <section className="flex-shrink-0 flex flex-col gap-8 flex-grow bg-base-300 rounded-xl flex-1 relative   p-4">
+      <section className="flex-shrink-0 flex flex-col gap-8 flex-grow bg-base-300 rounded-xl flex-1 relative p-4">
         {selected === "user_info" && (
           <MyInfo
             data={{

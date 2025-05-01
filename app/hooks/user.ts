@@ -17,8 +17,7 @@ export const useAddUser = () => {
   const { setUser } = useUserStoreActions();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Record<string, string> | null>(null);
-
+  const [error, setError] = useState<CustomError | null>(null);
   const handleAddUser = async (data: RegisterFormProps) => {
     try {
       setError(null);
@@ -28,9 +27,11 @@ export const useAddUser = () => {
       router.push("/blogs");
     } catch (error) {
       if (error instanceof CustomError) {
-        setError(error.errors);
+        setError(error);
       } else {
-        setError({ message: "An unknown registration error occurred" });
+        setError(
+          new CustomError("An unknown registration error occurred", 400)
+        );
       }
     } finally {
       setLoading(false);
@@ -44,8 +45,7 @@ export const useLoginUser = () => {
   const { setUser } = useUserStoreActions();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Record<string, string> | null>(null);
-
+  const [error, setError] = useState<CustomError | null>(null);
   const handleLoginUser = async (data: LoginFormProps) => {
     try {
       setError(null);
@@ -55,9 +55,9 @@ export const useLoginUser = () => {
       router.push("/blogs");
     } catch (error) {
       if (error instanceof CustomError) {
-        setError(error.errors);
+        setError(error);
       } else {
-        setError({ message: "An unknown login error occurred" });
+        setError(new CustomError("An unknown login error occurred", 400));
       }
     } finally {
       setLoading(false);
@@ -71,7 +71,7 @@ export const useGetMyInfo = () => {
   const router = useRouter();
   const { setUser } = useUserStoreActions();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Record<string, string> | null>(null);
+  const [error, setError] = useState<CustomError | null>(null);
 
   const handleGetMyInfo = async () => {
     try {
@@ -80,14 +80,13 @@ export const useGetMyInfo = () => {
     } catch (error) {
       if (error instanceof CustomError) {
         if (error.statusCode === 401 || error.statusCode === 403) {
-          console.log("error", error);
           router.push("/login");
         }
-        setError(error.errors);
+        setError(error);
       } else {
-        setError({ message: "An unknown error occurred while fetching info" });
+        console.log("enreted inside else");
+        setError(new CustomError("An unknown login error occurred", 400));
       }
-      router.push("/login");
     } finally {
       setLoading(false);
     }
@@ -104,9 +103,16 @@ export const useValidateUser = () => {
     try {
       await validateUser();
     } catch (error) {
-      router.push("/login");
-      if (typeof window !== "undefined") localStorage.removeItem("userData");
-      reset();
+      if (error instanceof CustomError) {
+        if (error.statusCode === 401 || error.statusCode === 403) {
+          console.log("error", error);
+          router.push("/login");
+          if (typeof window !== "undefined")
+            localStorage.removeItem("userData");
+        }
+
+        reset();
+      }
     }
   };
   useEffect(() => {

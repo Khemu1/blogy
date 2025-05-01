@@ -1,7 +1,6 @@
 import { CommentProps } from "@/app/types";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
 const Comment: React.FC<{ commentData: CommentProps; last: boolean }> = ({
   commentData,
   last,

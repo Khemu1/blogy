@@ -11,8 +11,10 @@ import { useRouter } from "next/navigation";
 import FileUploader from "@/app/components/blog/FileUploader";
 import { validateWithSchema } from "@/app/utils/comment";
 import { Loader, CheckCircle, Eye } from "lucide-react";
+import { useToast } from "@/app/store/toast";
 
 const NewBlog = () => {
+  const { setToast } = useToast();
   const userStore = useUserStore();
   const routeTo = useRouter();
   const [data, setData] = useState<NewBlogProp>({
@@ -25,7 +27,7 @@ const NewBlog = () => {
   const [sanitizedTitle, setSanitizedTitle] = useState<string>("");
   const schema = getNewBlogSchema();
 
-  const { handleAddBlog, loading, error: APIerror, success } = useAddBlog();
+  const { handleAddBlog, loading, error: apiError, success } = useAddBlog();
   const [previewWindow, setPreviewWindow] = useState<Window | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -44,6 +46,12 @@ const NewBlog = () => {
       throw error;
     }
   };
+
+  useEffect(() => {
+    if (apiError) {
+      setToast(apiError.message, "error");
+    }
+  }, []);
 
   const handleImageUpload = (url: string, file: File) => {
     console.log("adding image", url, file);
@@ -181,12 +189,6 @@ const NewBlog = () => {
                 )}
               </button>
             </div>
-
-            {APIerror?.message && (
-              <div className="mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-md">
-                {APIerror.message}
-              </div>
-            )}
           </form>
         </div>
 
@@ -226,7 +228,13 @@ const NewBlog = () => {
                     />
                   </div>
                 )}
-                <h1 className="text-3xl font-bold mb-4 text-wrap break-words">
+                <h1
+                  className="text-3xl font-bold mb-4 text-wrap break-words"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      sanitizedTitle || "<p>Your title will appear here</p>",
+                  }}
+                >
                   {data.title || "Your title will appear here"}
                 </h1>
                 <div

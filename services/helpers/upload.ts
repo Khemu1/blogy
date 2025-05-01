@@ -1,5 +1,5 @@
 import { CustomError } from "@/middlewares/error/CustomError";
-import { createWriteStream, existsSync, mkdirSync, rename } from "fs";
+import { createWriteStream, existsSync, mkdirSync, rename, unlinkSync } from "fs";
 import { join } from "path";
 
 const tempPath = join(process.cwd(), "temp");
@@ -28,10 +28,10 @@ export const moveFileFromTempToUploads = async (
         throw new Error("Could not move file to upload directory");
       }
     });
-    console.log("✅ File moved to uploads:", destinationPath);
+    console.log("File moved to uploads:", destinationPath);
     return `/assets/blogs/${id}.${extension}`;
   } catch (error) {
-    console.error("❌ Failed to move file:", error);
+    console.error("Failed to move file:", error);
     throw new Error("Could not move file to upload directory");
   }
 };
@@ -55,5 +55,15 @@ export const appendChunkToUpload = async (
     }
   } catch (error) {
     throw error;
+  }
+};
+
+export const deleteTempFile = (uploadId: string) => {
+  const filePath = join(process.cwd(), "temp", `${uploadId}`);
+  if (existsSync(filePath)) {
+    unlinkSync(filePath);
+    console.log(`File ${uploadId} deleted successfully from temp storage.`);
+  } else {
+    console.warn(`File ${uploadId} not found in temp storage.`);
   }
 };

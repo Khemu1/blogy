@@ -3,8 +3,10 @@ import { CustomError } from "@/middlewares/error/CustomError";
 
 export const handleResponse = async (response: Response) => {
   if (!response.ok) {
+    console.log("response isn't ok ");
     try {
       const errorData = (await response.json()) as CustomError;
+      console.log("errorData", errorData);
       throw new CustomError(
         errorData.message,
         response.status,
@@ -14,7 +16,7 @@ export const handleResponse = async (response: Response) => {
         errorData.errors
       );
     } catch (err) {
-      throw new CustomError("Unexpected error", response.status);
+      throw err;
     }
   }
   return await response.json();

@@ -1,4 +1,5 @@
 import { useDeleteBlog } from "@/app/hooks/blog";
+import { useToast } from "@/app/store/toast";
 import { useUserStoreActions } from "@/app/store/user";
 import { MyProfileBlogs } from "@/app/types";
 import DOMPurify from "dompurify";
@@ -8,9 +9,8 @@ import { useEffect, useState } from "react";
 
 const MyBlog: React.FC<{
   blog: MyProfileBlogs;
-  onSuccess: (message: string) => void;
-  onError: (message: string) => void;
-}> = ({ blog, onSuccess, onError }) => {
+}> = ({ blog }) => {
+  const { setToast } = useToast();
   const { deleteBlog } = useUserStoreActions();
   const [sanitizedTitle, setSanitizedTitle] = useState(blog.title);
   const { handleDeleteBlog, success, error } = useDeleteBlog();
@@ -33,12 +33,12 @@ const MyBlog: React.FC<{
   };
 
   useEffect(() => {
+    if (error) {
+      setToast(error.message, "error");
+    }
     if (success) {
       deleteBlog(blog.id);
-      onSuccess("Blog deleted successfully!");
-    }
-    if (error) {
-      onError(error.message || "Failed to delete blog");
+      setToast("Blog deleted successfully!", "success");
     }
   }, [success, error]);
   return (

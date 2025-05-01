@@ -54,7 +54,7 @@ const Register = () => {
               id="email"
               className={`form_input 
                 ${
-                  errors?.email || ApiError?.email
+                  errors?.email || ApiError?.errors.email
                     ? styles.error_bottom_border
                     : ""
                 }
@@ -81,7 +81,7 @@ const Register = () => {
             <input
               id="username"
               className={`form_input ${
-                errors?.username || ApiError?.username
+                errors?.username || ApiError?.errors.username
                   ? styles.error_bottom_border
                   : ""
               }`}
@@ -94,10 +94,10 @@ const Register = () => {
               }}
             />
           </div>
-          {(errors?.username || ApiError?.username) && (
+          {(errors?.username || ApiError?.errors.username) && (
             <div className="flex ">
               <small className={styles.error}>
-                {errors?.username ?? ApiError?.username}
+                {errors?.username ?? ApiError?.errors.username}
               </small>
             </div>
           )}
@@ -109,7 +109,7 @@ const Register = () => {
             <input
               id="password"
               className={`form_input ${
-                errors?.password || ApiError?.password
+                errors?.password || ApiError?.errors.password
                   ? styles.error_bottom_border
                   : ""
               }`}
@@ -122,10 +122,10 @@ const Register = () => {
               }}
             />
           </div>
-          {(errors?.password || ApiError?.password) && (
+          {(errors?.password || ApiError?.errors.password) && (
             <div className="flex ">
               <small className={styles.error}>
-                {errors?.password ?? ApiError?.password}
+                {errors?.password ?? ApiError?.errors.password}
               </small>
             </div>
           )}
@@ -149,10 +149,10 @@ const Register = () => {
             />
           </div>
 
-          {(errors?.confirmPassword || ApiError?.confirmPassword) && (
+          {(errors?.confirmPassword || ApiError?.errors.confirmPassword) && (
             <div className="flex ">
               <small className={styles.error}>
-                {errors?.confirmPassword ?? ApiError?.confirmPassword}
+                {errors?.confirmPassword ?? ApiError?.errors.confirmPassword}
               </small>
             </div>
           )}
@@ -165,7 +165,7 @@ const Register = () => {
           Register
         </button>
 
-        {ApiError?.message && (
+        {ApiError?.errors.message && (
           <small className={styles.login_error}>{ApiError.message}</small>
         )}
 
