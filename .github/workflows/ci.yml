@@ -51,10 +51,10 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "22"
+          node-version: "20"
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --include=dev
 
       - name: Build project
         run: npm run build
@@ -67,7 +67,7 @@ jobs:
           done
 
       - name: Run migrations (if applicable)
-        run: npx sequelize-cli db:migrate
+        run: npm run db:migrate
 
       - name: Start server in background
         run: |
