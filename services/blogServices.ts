@@ -8,12 +8,15 @@ import { NextRequest } from "next/server";
 import { Op } from "sequelize";
 import Upload from "@/db/models/Upload";
 import { moveFileFromTempToUploads } from "./helpers/upload";
+import { sanitizeData } from "@/app/utils";
 
-export const getBlogsParams = (req: NextRequest) => {
+export const getBlogsParams = async (req: NextRequest) => {
   const p = req.nextUrl.searchParams;
   let searchParams: SearchParams = {};
   const sorting = p.get("sortBy");
-
+  const sentizedData = (await sanitizeData(sorting)) as unknown as
+    | string
+    | null;
   let ordering: [string, "ASC" | "DESC"] = ["createdAt", "DESC"];
   searchParams.q = p.get("q");
   searchParams.searchBy = p.get("searchBy") as
@@ -22,7 +25,7 @@ export const getBlogsParams = (req: NextRequest) => {
     | "content"
     | null;
 
-  switch (sorting) {
+  switch (sentizedData) {
     case "create-d-asc":
       ordering = ["createdAt", "ASC"];
       break;
@@ -36,14 +39,18 @@ export const getBlogsParams = (req: NextRequest) => {
       ordering = ["updatedAt", "DESC"];
       break;
     default:
-      ordering = ["createdAt", "DESC"];
+      ordering = ["createdAt", "ASC"];
   }
   return { searchParams, ordering };
 };
 
-export const getPageNumber = (req: NextRequest) => {
+export const getPageNumber = async (req: NextRequest) => {
   const p = req.nextUrl.searchParams;
-  const page = parseInt(p.get("page") ?? "1", 10);
+  const page = parseInt(
+    ((await sanitizeData(p.get("page"))) as unknown as string | null) ?? "1",
+    10
+  );
+
   if (isNaN(page) || page < 1) return 1;
   return page;
 };
@@ -296,8 +303,7 @@ export const getBlogForEditService = async (blogId: number, userId: number) => {
   }
 };
 
-
-export const getRandomBlogService = async () => { 
+export const getRandomBlogService = async () => {
   try {
     const blogs = await Blog.findAll({
       attributes: { include: ["id", "title", "userId"] },
@@ -309,4 +315,4 @@ export const getRandomBlogService = async () => {
     console.log(error);
     throw error;
   }
-}
+};
