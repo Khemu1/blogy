@@ -7,7 +7,7 @@ dotenv.config({ path: envPath });
 
 
 module.exports = {
-  config: path.resolve("config", "config.mjs"),
+  config: path.resolve("config", "config.cjs"),
   "models-path": path.resolve("db", "models"),
   "seeders-path": path.resolve("db", "seeders"),
   "migrations-path": path.resolve("db", "migrations"),
