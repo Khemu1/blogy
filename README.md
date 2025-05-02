@@ -61,9 +61,18 @@
 3. **Set up environment variables**:  
    Create `.env` file (use `.env.example` as a template):
    ```env
-   DATABASE_URL="postgres://user:password@localhost:5432/blogy"
-   REDIS_URL="redis://localhost:6379"
-   SECRET_KEY="your-secret-key"
+   JWT_ACCESS_TOKEN_SECRET=your-secret-key
+   JWT_REFRESH_TOKEN_SECRET=your-secret-key
+   JWT_ACCESS_TOKEN_EXPIRE=your-access-token-expiration-time
+   JWT_REFRESH_TOKEN_EXPIRE=your-refresh-token-expiration-time
+   DB_USERNAME=your-database-username
+   DB_PASSWORD=your-database-password
+   DB_DATABASE=your-database-name
+   DB_HOST=your-database-host
+   DB_PORT=your-database-port
+   NODE_ENV=development
+   DIALECT=postgres
+
    ```
 4. **Run migrations**:
    ```bash
