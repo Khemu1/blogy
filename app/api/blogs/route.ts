@@ -38,8 +38,8 @@ export const GET = async (req: NextRequest) => {
       throw new CustomError("Too many requests", 429);
     }
     await initializeDatabase();
-    const { searchParams, ordering } = getBlogsParams(req);
-    const pageNumber = getPageNumber(req);
+    const { searchParams, ordering } = await getBlogsParams(req);
+    const pageNumber = await getPageNumber(req);
     const { blogs, totalPages } = await getAllBlogsService(
       searchParams,
       ordering,
