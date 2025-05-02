@@ -85,12 +85,7 @@ export async function fetchHandler(options: {
     );
     const responseBody = await response.json().catch(() => ({}));
 
-    console.debug("[fetchHandler] Response:", {
-      status: response.status,
-      headers: responseHeaders,
-      body: responseBody ? "[exists]" : null,
-      cookies: responseCookies ? "[exists]" : null,
-    });
+
 
     return {
       status: response.status,
@@ -123,7 +118,6 @@ export function extractCookies(
     cookies[cookie.name] = cookie.value;
   }
 
-  console.debug("[extractCookies] Extracted cookies:", Object.keys(cookies));
   return cookies;
 }
 

@@ -65,6 +65,7 @@ Upload.init(
       },
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
+      
     },
     fileName: {
       type: DataTypes.STRING,
