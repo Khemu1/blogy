@@ -13,7 +13,7 @@
     "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "db:seed": "sequelize-cli db:seed:all",
     "db:seed:undo": "sequelize-cli db:seed:undo:all",
-    "test": "clear && jest"
+    "test": "jest"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",
