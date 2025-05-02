@@ -13,8 +13,8 @@ import {
 } from "@/services/blogServices";
 import { NextRequest, NextResponse } from "next/server";
 export const POST = async (req: NextRequest) => {
-  const ip = req.headers.get("x-forwarded-for") || "localhost";
   try {
+    const ip = req.headers.get("x-forwarded-for") || "localhost";
     const { success } = await rateLimit(`rate_limit:${ip}`, 60, 60);
     if (!success) {
       throw new CustomError("Too many requests", 429);

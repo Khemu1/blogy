@@ -24,7 +24,7 @@ export const DELETE = async (req: NextRequest, { params }: Props) => {
     await doesUserExist(userId);
     await initializeDatabase();
     await deleteCommentService(+params.id, +userId);
-    return NextResponse.json({ status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     return errorHandler(error, req);
   }
@@ -49,7 +49,7 @@ export const PATCH = async (req: NextRequest, { params }: Props) => {
       "comment updated and returning data back ",
       sentizedData.content
     );
-    return NextResponse.json(sentizedData.content);
+    return NextResponse.json({ ...sentizedData });
   } catch (error) {
     return errorHandler(error, req);
   }

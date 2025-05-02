@@ -1,0 +1,37 @@
+language: node_js
+node_js:
+  - "22"
+
+dist: focal
+
+services:
+  - postgresql
+  - redis-server
+
+env:
+  global:
+    - NODE_ENV=production
+    - PGUSER=postgres
+    - PGHOST=localhost
+    - PGDATABASE=test_db
+    - PGPASSWORD=
+    - PGPORT=5432
+
+before_script:
+  - psql -c 'CREATE DATABASE test_db;' -U postgres
+
+cache:
+  directories:
+    - node_modules
+
+install:
+  - npm install
+  - npm run build
+  - npm tun start
+  - npm run db:migrate
+  - npm run test
+
+script:
+  - nohup npm run start &> app.log &  # Start the Next.js server in background
+  - sleep 5                           # Give the server time to start
+  - npm run test                      # Run your tests (they should hit the running app)

@@ -14,3 +14,7 @@ export const rateLimit = async (
   const success = current <= limit;
   return { success };
 };
+
+export const closeRedis = async () => {
+  await redis.disconnect();
+};

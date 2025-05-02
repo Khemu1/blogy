@@ -1,3 +1,5 @@
+/// <reference path="./config.d.ts" />
+
 /**
  * @type {import('./config.d.ts').Config}
  */
@@ -25,4 +27,4 @@ const Config = {
   },
 };
 
-export default Config;
+module.exports = Config;

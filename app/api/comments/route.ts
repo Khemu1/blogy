@@ -19,9 +19,12 @@ export async function POST(req: NextRequest) {
     };
     const userId = Number(req.headers.get("X-User-Id"));
     await initializeDatabase();
-    const comment = await addCommentService(sanitizedData, +userId);
+    const { id } = await addCommentService(sanitizedData, +userId);
     return Response.json(
-      { message: "Comment created successfully", comment: sanitizedData },
+      {
+        message: "Comment created successfully",
+        comment: { ...sanitizedData, id },
+      },
       { status: 201 }
     );
   } catch (error) {

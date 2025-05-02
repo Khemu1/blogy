@@ -18,15 +18,12 @@ const addCommentService = async (
         true
       );
     }
-    const user = await User.findByPk(userId, {
-      attributes: ["username"],
-    });
-    console.log(data);
-    await Comment.create({
+    const comment = await Comment.create({
       content: data.content,
       userId: userId,
       blogId: data.blogId,
     });
+    return comment;
   } catch (error) {
     console.log(error);
     throw error;

@@ -12,7 +12,8 @@ export const getNewBlogSchema = () => {
 
     imageId: string({ required_error: "Image is required" })
       .min(1, "Image is required")
-      .nullable(),
+      .nullable()
+      .optional(),
   });
 };
 

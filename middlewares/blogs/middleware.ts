@@ -5,11 +5,12 @@ import { CustomError } from "../error/CustomError";
 import { validateWithSchema } from "@/app/utils/comment";
 
 export async function addBlogMiddleware(req: NextRequest, res: NextResponse) {
-  const data: { title: string; content: string } = await req.json();
-  if (!data || !data.title || !data.content) {
-    return NextResponse.json({ message: "Invalid Blog Data" }, { status: 400 });
-  }
   try {
+    const data: { title: string; content: string } = await req.json();
+    console.log("data blog", data);
+    if (!data) {
+      throw new CustomError("Invalid Blog Data", 400, "", true);
+    }
     const schema = getNewBlogSchema();
     await schema.parseAsync(data);
     const response = NextResponse.next();
@@ -28,11 +29,13 @@ export async function addBlogMiddleware(req: NextRequest, res: NextResponse) {
 }
 
 export async function editBlogMiddleware(req: NextRequest, res: NextResponse) {
-  const data: { title: string; content: string } = await req.json();
-  if (!data || !data.title || !data.content) {
-    return NextResponse.json({ message: "Invalid Blog Data" }, { status: 400 });
-  }
   try {
+    const data: { title: string; content: string; blogId: number } =
+      await req.json();
+    if (!data) {
+      throw new CustomError("Invalid Blog Data", 400, "", true);
+    }
+
     const schema = getEditBlogSchema();
     await schema.parseAsync(data);
     const response = NextResponse.next();

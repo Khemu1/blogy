@@ -32,6 +32,7 @@ class CustomError extends Error {
 
 const sendDevError = (error: CustomError) => {
   const { statusCode, status, message, stack, type, details, errors } = error;
+
   return NextResponse.json(
     { message, status, details, statusCode, stack, type, errors },
     { status: statusCode }

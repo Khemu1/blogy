@@ -295,3 +295,18 @@ export const getBlogForEditService = async (blogId: number, userId: number) => {
     throw error;
   }
 };
+
+
+export const getRandomBlogService = async () => { 
+  try {
+    const blogs = await Blog.findAll({
+      attributes: { include: ["id", "title", "userId"] },
+      order: [["createdAt", "ASC"]],
+      limit: 1,
+    });
+    return blogs;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}

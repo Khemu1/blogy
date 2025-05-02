@@ -14,11 +14,11 @@ const registerUserService = async (data: RegisterFormProps) => {
     ]);
 
     if (existingUsername) {
-      throw new CustomError("Username already exists", 401, "", true);
+      throw new CustomError("Username already exists", 400, "", true);
     }
 
     if (existingEmail) {
-      throw new CustomError("Email already exists", 401, "", true);
+      throw new CustomError("Email already exists", 400, "", true);
     }
 
     const hashedPassword = bcrypt.hashSync(data.password, 10);
@@ -63,7 +63,7 @@ const loginUserService = async (data: LoginFormProps) => {
       },
     });
     if (!user || !bcrypt.compareSync(data.password, user.password)) {
-      throw new CustomError("invalid email or password", 401, "", true);
+      throw new CustomError("invalid email or password", 400, "", true);
     }
     const {
       password,
@@ -82,6 +82,7 @@ const loginUserService = async (data: LoginFormProps) => {
 
 const doesUserExist = async (id: number) => {
   try {
+    console.log("inside doesUserExist ", id);
     const user = await User.findOne({
       where: {
         id: id,

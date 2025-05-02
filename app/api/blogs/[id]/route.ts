@@ -37,13 +37,12 @@ export const DELETE = async (req: NextRequest, { params }: Props) => {
     if (!success) {
       throw new CustomError("Too many requests", 429);
     }
-    console.log("inside delete blog route");
     const userId = req.headers.get("X-User-Id") as string;
     console.log(userId);
     await doesUserExist(+userId);
     await initializeDatabase();
     await deleteBlogService(params.id, +userId);
-    return NextResponse.json({ status: 204 });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     return errorHandler(error, req);
   }
@@ -60,12 +59,8 @@ export const PUT = async (req: NextRequest, { params }: Props) => {
     const userId = req.headers.get("X-User-Id") as string;
     await doesUserExist(+userId);
     const sentizedData = (await sanitizeRequestBody(req)) as EditBlogProps;
-    const updatedBlog = await updateBlogService(
-      +params.id,
-      +userId,
-      sentizedData
-    );
-    return NextResponse.json(updatedBlog);
+    await updateBlogService(+params.id, +userId, sentizedData);
+    return NextResponse.json(sentizedData);
   } catch (error) {
     return errorHandler(error, req);
   }

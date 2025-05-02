@@ -9,6 +9,7 @@ import { validateWithSchema } from "@/app/utils/comment";
 export async function registerMiddleware(req: NextRequest) {
   try {
     const data = (await req.json()) as RegisterFormProps;
+    console.log("data in register middleware", data);
     const schema = registerSchema();
     await schema.parseAsync(data);
     return NextResponse.next();

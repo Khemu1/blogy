@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize";
-import Config from "./config.mjs";
+import Config from "./config.cjs";
 import dotenv from "dotenv";
 import path from "path";
 import pg from "pg";

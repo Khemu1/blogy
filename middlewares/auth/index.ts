@@ -6,10 +6,10 @@ export async function validateUser(req: NextRequest) {
   console.log("user middleware up");
 
   try {
-    const cookieStore = cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const refreshToken = cookieStore.get("refreshToken")?.value;
-
+    const accessToken = req.cookies.get("accessToken")?.value;
+    const refreshToken = req.cookies.get("refreshToken")?.value;
+    console.log("accessToken", accessToken);
+    console.log("refreshToken", refreshToken);
     if (!accessToken && !refreshToken) {
       throw new CustomError("Invalid token", 401, "Invalid token", true);
     }

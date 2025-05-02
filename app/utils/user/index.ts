@@ -1,7 +1,6 @@
 import { LoginErrorProps, RegisterErrorProps } from "@/app/types";
 import { object, string, ZodIssueCode } from "zod";
 
-
 export const registerSchema = () => {
   return object({
     email: string({ required_error: "Email is required" }).email(),
@@ -31,14 +30,10 @@ export const loginSchema = () => {
   return object({
     emailOrUsername: string({
       required_error: "Email or Username is required",
-    }).refine((val: string) => val.trim().length > 0, {
-      message: "Email or Username is required",
-    }),
-    password: string({ required_error: "Password is required" }).refine(
-      (val: string) => val.trim().length > 0,
-      {
-        message: "Password is required",
-      }
+    }).min(3, "Email or Username is required"),
+    password: string({ required_error: "Password is required" }).min(
+      8,
+      "password is required"
     ),
   });
   /**

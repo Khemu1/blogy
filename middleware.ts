@@ -3,7 +3,10 @@ import {
   registerMiddleware,
   loginMiddleware,
 } from "./middlewares/users/middleware";
-import { addCommentMiddleware } from "./middlewares/comments/middleware";
+import {
+  addCommentMiddleware,
+  editCommentMiddleware,
+} from "./middlewares/comments/middleware";
 import {
   addBlogMiddleware,
   editBlogMiddleware,
@@ -18,9 +21,11 @@ export async function middleware(req: NextRequest) {
 
     // Route-specific handling
     if (pathname.startsWith("/api/auth/login")) {
+      console.log("inside login middleware");
       return await loginMiddleware(req);
     }
     if (pathname.startsWith("/api/auth/register")) {
+      console.log("inside register middleware");
       return await registerMiddleware(req);
     }
 
@@ -37,6 +42,9 @@ export async function middleware(req: NextRequest) {
       if (req.method === "POST") {
         return await addCommentMiddleware(req, userValidationResponse);
       }
+      if (req.method === "PATCH") {
+        return await editCommentMiddleware(req, userValidationResponse);
+      }
       return userValidationResponse;
     }
 
@@ -47,6 +55,7 @@ export async function middleware(req: NextRequest) {
       }
       if (req.method === "POST") {
         const userValidationResponse = await validateUser(req);
+        console.log("inside add blog middleware and passed user validation");
         return await addBlogMiddleware(req, userValidationResponse);
       }
       if (req.method === "PUT") {
@@ -90,7 +99,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/api/auth",
+    "/api/auth/:path*",
     "/api/validate-user",
     "/api/blogs/:path*",
     "/api/comments/:path*",
