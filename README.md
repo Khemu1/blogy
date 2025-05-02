@@ -26,7 +26,7 @@
 - **Frontend**: Next.js (React)
 - **Styling**: Tailwind CSS + Daisy UI
 - **Database**: PostgreSQL (with Sequelize ORM)
-- **redis**: Redis
+- **Rate Limiting**: Redis (with ioredis client)
 
 ### Media Handling
 
