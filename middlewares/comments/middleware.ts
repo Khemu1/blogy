@@ -2,7 +2,6 @@ import { NextResponse, NextRequest } from "next/server";
 import { getCommentSchema, validateWithSchema } from "@/app/utils/comment";
 import { ZodError } from "zod";
 import { CustomError } from "../error/CustomError";
-import { blogyFeatures } from "@/constants";
 
 export async function addCommentMiddleware(
   req: NextRequest,
