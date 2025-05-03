@@ -7,7 +7,11 @@ import { EditBlogProps, NewBlogProp, SearchParams } from "@/app/types";
 import { NextRequest } from "next/server";
 import { Op, Order } from "sequelize";
 import Upload from "@/db/models/Upload";
-import { moveFileFromTempToUploads } from "./helpers/upload";
+import {
+  deleteTempFile,
+  deleteUpload,
+  moveFileFromTempToUploads,
+} from "./helpers/upload";
 import { sanitizeData } from "@/app/utils";
 
 export const getBlogsParams = async (req: NextRequest) => {
@@ -241,12 +245,32 @@ export const getBlogService = async (blogId: number, userId: number) => {
 
 export const deleteBlogService = async (blogId: number, userId: number) => {
   try {
+    const blog = await Blog.findOne({
+      where: {
+        id: blogId,
+        userId: userId,
+      },
+      include: [
+        {
+          association: "image",
+          required: false,
+        },
+      ],
+    });
     const res = await Blog.destroy({
       where: {
         id: blogId,
         userId: userId,
       },
     });
+    const blogImage = await Upload.findOne({
+      where: { blogId: blogId },
+    });
+    if (blogImage) {
+      await Upload.destroy({ where: { id: blogImage.id } });
+      await deleteUpload(blogImage.id);
+    }
+
     if (res === 0) {
       throw new CustomError("Blog not found", 404);
     }

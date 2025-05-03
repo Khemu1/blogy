@@ -98,7 +98,7 @@ export const useEditMyComment = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [data, setData] = useState<string | null>(null);
+  const [data, setData] = useState<{blogId: number, content: string} | null>(null);
   const [error, setError] = useState<CustomError | null>(null);
   const handleEditMyComment = async (
     commentId: number,

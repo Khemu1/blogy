@@ -38,7 +38,6 @@ export const DELETE = async (req: NextRequest, { params }: Props) => {
       throw new CustomError("Too many requests", 429);
     }
     const userId = req.headers.get("X-User-Id") as string;
-    console.log(userId);
     await doesUserExist(+userId);
     await initializeDatabase();
     await deleteBlogService(params.id, +userId);

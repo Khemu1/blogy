@@ -1,5 +1,11 @@
 import { CustomError } from "@/middlewares/error/CustomError";
-import { createWriteStream, existsSync, mkdirSync, rename, unlinkSync } from "fs";
+import {
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  rename,
+  unlinkSync,
+} from "fs";
 import { join } from "path";
 
 const tempPath = join(process.cwd(), "temp");
@@ -65,5 +71,21 @@ export const deleteTempFile = (uploadId: string) => {
     console.log(`File ${uploadId} deleted successfully from temp storage.`);
   } else {
     console.warn(`File ${uploadId} not found in temp storage.`);
+  }
+};
+
+export const deleteUpload = async (uploadId: string) => {
+  const filePath = join(
+    process.cwd(),
+    "public",
+    "assets",
+    "blogs",
+    `${uploadId}`
+  );
+  if (existsSync(filePath)) {
+    unlinkSync(filePath);
+    console.log(`File ${uploadId} deleted successfully from uploads.`);
+  } else {
+    console.warn(`File ${uploadId} not found in uploads.`);
   }
 };

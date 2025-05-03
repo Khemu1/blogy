@@ -53,9 +53,9 @@ const MyComment: FC<{
   useEffect(() => {
     if (editSuccess && data) {
       setToast("Comment updated successfully!", "success");
-      editComment(comment.id, data);
+      editComment(comment.id, data.content);
       setIsEditModalOpen(false);
-      setEditedContent(data);
+      setEditedContent(data.content);
     }
     if (editError) {
       setToast(editError.message, "error");
