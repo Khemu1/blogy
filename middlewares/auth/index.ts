@@ -8,8 +8,6 @@ export async function validateUser(req: NextRequest) {
   try {
     const accessToken = req.cookies.get("accessToken")?.value;
     const refreshToken = req.cookies.get("refreshToken")?.value;
-    console.log("accessToken", accessToken);
-    console.log("refreshToken", refreshToken);
     if (!accessToken && !refreshToken) {
       throw new CustomError("Invalid token", 401, "Invalid token", true);
     }

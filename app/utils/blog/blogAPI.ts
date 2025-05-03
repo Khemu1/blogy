@@ -3,7 +3,6 @@ import { CustomError } from "@/middlewares/error/CustomError";
 
 export const handleResponse = async (response: Response) => {
   if (!response.ok) {
-    console.log("response isn't ok ");
     try {
       const errorData = (await response.json()) as CustomError;
       console.log("errorData", errorData);
@@ -18,6 +17,9 @@ export const handleResponse = async (response: Response) => {
     } catch (err) {
       throw err;
     }
+  }
+  if(response.status === 204) {
+    return null;
   }
   return await response.json();
 };
@@ -94,7 +96,7 @@ export const deleteBlog = async (blogId: number) => {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });
-    return await handleResponse(response);
+    await handleResponse(response);
   } catch (error) {
     throw error;
   }

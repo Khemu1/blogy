@@ -11,9 +11,8 @@ const Page = () => {
   const { loading, data, handleGetBlogs, error } = useGetBlogs();
   const searchParams = useSearchParams();
 
-  // Extract params once and cache them
   const query = searchParams.get("q") ?? "";
-  const sortBy = searchParams.get("sortBy") ?? "create-d-asc";
+  const sortBy = searchParams.get("sortBy") ?? "create-d-desc";
   const searchBy = searchParams.get("searchBy") ?? "";
 
   const initialPage = parseInt(searchParams.get("page") ?? "1", 10);

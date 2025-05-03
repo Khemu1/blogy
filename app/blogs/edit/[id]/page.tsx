@@ -1,8 +1,8 @@
 "use client";
 import { useAddBlog, useEditBlog, useGetBlogForEdit } from "@/app/hooks/blog";
-import { EditBlogProps, NewBlogProp } from "@/app/types";
-import { useState, useEffect } from "react";
-import { getEditBlogSchema, getNewBlogSchema } from "@/app/utils/blog";
+import { EditBlogProps } from "@/app/types";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { getEditBlogSchema } from "@/app/utils/blog";
 import { ZodError } from "zod";
 import Image from "next/image";
 import { marked } from "marked";
@@ -22,22 +22,26 @@ const EditBlog = () => {
   const { id } = useParams();
   const { handleGetBlogForEdit, loading: loadingBlog } = useGetBlogForEdit();
   const [hasImage, setHasImage] = useState(false);
-  const routeTo = useRouter();
   const [data, setData] = useState<EditBlogProps>({
     title: "",
     content: "",
     image: null,
   });
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
-  const [sanitizedContent, setSanitizedContent] = useState<string>("");
-  const [sanitizedTitle, setSanitizedTitle] = useState<string>("");
-  const schema = getEditBlogSchema();
-
-  const { handleEditBlog, loading, error: apiError, success } = useEditBlog();
   const [showPreview, setShowPreview] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const schema = useMemo(() => getEditBlogSchema(), []);
 
-  const resetForm = () => {
+  const { handleEditBlog, loading, error: apiError, success } = useEditBlog();
+
+  const [sanitizedContent, sanitizedTitle] = useMemo(() => {
+    return [
+      marked(data.content) || "<p>Your content will appear here</p>",
+      marked(data.title) || "<p>Your title will appear here</p>",
+    ];
+  }, [data.content, data.title]);
+
+  const resetForm = useCallback(() => {
     setData({
       title: blogStore.title || "",
       content: blogStore.content || "",
@@ -46,45 +50,47 @@ const EditBlog = () => {
     setFile(null);
     setErrors(null);
     setHasImage(!!blogStore.image);
-  };
+  }, [blogStore]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors(null);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setErrors(null);
 
-    try {
-      const prep = {
-        title: data.title,
-        content: data.content,
-        image:
-          data.image && typeof data.image !== "string"
-            ? undefined
-            : typeof data.image === "string"
-            ? data.image
-            : null,
-      };
+      try {
+        const prep = {
+          title: data.title,
+          content: data.content,
+          image:
+            data.image && typeof data.image !== "string"
+              ? undefined
+              : typeof data.image === "string"
+              ? data.image
+              : null,
+        };
 
-      schema.parse(prep);
-      console.log(prep);
-      await handleEditBlog(blogStore.id, prep);
-    } catch (error) {
-      if (error instanceof ZodError) {
-        setErrors(validateWithSchema(error));
-      } else {
-        console.error("Error submitting blog:", error);
+        schema.parse(prep);
+        await handleEditBlog(blogStore.id, prep);
+      } catch (error) {
+        if (error instanceof ZodError) {
+          setErrors(validateWithSchema(error));
+        }
       }
-    }
-  };
+    },
+    [data, schema, handleEditBlog, blogStore.id]
+  );
 
-  const handleImageUpload = (url: string, file: File) => {
+  const handleImageUpload = useCallback((url: string, file: File) => {
     setData((prev) => ({ ...prev, image: url }));
     setFile(file);
-  };
+  }, []);
 
-  const handleImageCancel = () => {
+  const handleImageCancel = useCallback(() => {
     setData((prev) => ({ ...prev, image: null }));
     setFile(null);
-  };
+  }, []);
+
+  const togglePreview = useCallback(() => setShowPreview((prev) => !prev), []);
 
   useEffect(() => {
     if (apiError) {
@@ -93,58 +99,38 @@ const EditBlog = () => {
     if (errors?.titleOrContent) {
       setToast(errors.titleOrContent, "error");
     }
-  }, [apiError, errors?.titleOrContent]);
+  }, [apiError, errors?.titleOrContent, setToast]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (success) {
       setToast("Blog updated successfully", "success");
+      timer = setTimeout(() => router.push(`/blogs/${blogStore.id}`), 2000);
     }
-    if (success) {
-      timer = setTimeout(() => {
-        router.push(`/blogs/${blogStore.id}`);
-      }, 2000);
-    }
-  }, [success]);
-
-  useEffect(() => {
-    const convertAndSanitizeMarkdown = async () => {
-      const rawHtml = await marked(data.content);
-      setSanitizedContent(rawHtml);
-    };
-
-    const convertAndSanitizeMarkdownForTitle = async () => {
-      const rawHtml = await marked(data.title);
-      setSanitizedTitle(rawHtml);
-    };
-
-    convertAndSanitizeMarkdown();
-    convertAndSanitizeMarkdownForTitle();
-  }, [data.content, data.title]);
+    return () => clearTimeout(timer);
+  }, [success, router, blogStore.id, setToast]);
 
   useEffect(() => {
     if (userStore.id < 1 && !loadingBlog) {
-      const timeout = setTimeout(() => {
-        routeTo.push("/blogs");
-      }, 100);
+      const timeout = setTimeout(() => router.push("/blogs"), 100);
       return () => clearTimeout(timeout);
     }
-  }, [userStore.id, blogStore.id]);
+  }, [userStore.id, loadingBlog, router]);
 
   useEffect(() => {
     if (blogStore.id > 0) {
       resetForm();
     }
-  }, [blogStore.id]);
+  }, [blogStore.id, resetForm]);
 
   useEffect(() => {
     const parsedId = +id;
     if (parsedId && typeof parsedId === "number") {
-      (async () => {
-        await handleGetBlogForEdit(parsedId);
-      })();
+      handleGetBlogForEdit(parsedId);
     }
   }, [id]);
+
+  if (userStore.id < 1) return null;
 
   return (
     <div className="w-full max-w-[700px] sm:max-w-[90%] md:max-w-[600px] lg:max-w-[900px] xl:max-w-[1100px] mx-auto p-4 md:p-6">
@@ -187,14 +173,11 @@ const EditBlog = () => {
               blogStore.image &&
               typeof blogStore.image !== "string" ? (
                 <div className="relative group">
-                  <div className="relative w-full h-48 rounded-md overflow-hidden">
+                  <div className="relative w-full h-64 md:h-96 rounded-md overflow-hidden">
                     <Image
-                      src={
-                        "/assets/blogs/" +
-                        blogStore.image.id +
-                        "." +
-                        blogStore.image.mimeType.split("/").pop()
-                      }
+                      src={`/assets/blogs/${
+                        blogStore.image.id
+                      }.${blogStore.image.mimeType.split("/").pop()}`}
                       alt="Blog header image"
                       fill
                       className="object-cover"
@@ -205,7 +188,7 @@ const EditBlog = () => {
                     type="button"
                     onClick={() => {
                       setHasImage(false);
-                      setData({ ...data, image: null });
+                      setData((prev) => ({ ...prev, image: null }));
                     }}
                     className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full lg:opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -247,7 +230,7 @@ const EditBlog = () => {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowPreview(true)}
+                  onClick={togglePreview}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
                 >
                   <Eye className="h-5 w-5" />
@@ -290,69 +273,56 @@ const EditBlog = () => {
           </form>
         </div>
       </div>
+
       <dialog
         id="preview-modal"
         className={`modal ${showPreview ? "modal-open" : ""}`}
-        onClick={() => setShowPreview(false)}
+        onClick={togglePreview}
       >
         <div
           className="modal-box max-w-6xl h-[90vh] max-h-[800px] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex justify-between items-center mb-4 bg-base-100 pt-4 pb-2 z-10 ">
+          <div className="flex justify-between items-center mb-4 bg-base-100 pt-4 pb-2 z-10">
             <h2 className="text-2xl font-bold">Blog Preview</h2>
-            <button
-              onClick={() => setShowPreview(false)}
-              className="btn btn-sm btn-circle"
-            >
-              ✕
+            <button onClick={togglePreview} className="btn btn-sm btn-circle">
+              <X className="h-4 w-4" />
             </button>
           </div>
 
           <div className="prose dark:prose-invert max-w-none">
             {file && (
-              <div className="relative w-full h-[320px] !rounded-lg overflow-hidden mb-6">
+              <div className="relative w-full h-64 md:h-96 rounded-md overflow-hidden mb-6">
                 <Image
                   src={URL.createObjectURL(file)}
                   alt="Blog header preview"
                   fill
-                  className="object-cover"
+                  className="object-cover !m-0"
                 />
               </div>
             )}
             {data.image && typeof data.image !== "string" && (
-              <div className="relative w-full h-48 rounded-md overflow-hidden mb-4">
+              <div className="relative w-full h-64 md:h-96 rounded-md overflow-hidden mb-4">
                 <Image
-                  src={
-                    "/assets/blogs/" +
-                    data.image.id +
-                    "." +
-                    data.image.mimeType.split("/").pop()
-                  }
+                  src={`/assets/blogs/${data.image.id}.${data.image.mimeType
+                    .split("/")
+                    .pop()}`}
                   alt="Blog header preview"
                   fill
-                  className="object-cover"
+                  className="object-cover !m-0"
                 />
               </div>
             )}
             <h1
               className="text-4xl font-bold mb-6"
-              dangerouslySetInnerHTML={{
-                __html: sanitizedTitle || "<p>Your title will appear here</p>",
-              }}
-            ></h1>
+              dangerouslySetInnerHTML={{ __html: sanitizedTitle }}
+            />
             <div
               className="prose dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{
-                __html:
-                  sanitizedContent || "<p>Your content will appear here</p>",
-              }}
+              dangerouslySetInnerHTML={{ __html: sanitizedContent }}
             />
           </div>
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
       </dialog>
     </div>
   );

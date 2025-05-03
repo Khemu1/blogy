@@ -5,7 +5,7 @@ import User from "@/db/models/User";
 import { CustomError } from "@/middlewares/error/CustomError";
 import { EditBlogProps, NewBlogProp, SearchParams } from "@/app/types";
 import { NextRequest } from "next/server";
-import { Op } from "sequelize";
+import { Op, Order } from "sequelize";
 import Upload from "@/db/models/Upload";
 import { moveFileFromTempToUploads } from "./helpers/upload";
 import { sanitizeData } from "@/app/utils";
@@ -14,9 +14,9 @@ export const getBlogsParams = async (req: NextRequest) => {
   const p = req.nextUrl.searchParams;
   let searchParams: SearchParams = {};
   const sorting = p.get("sortBy");
-  const sentizedData = (await sanitizeData(sorting)) as unknown as
-    | string
-    | null;
+  const sanitizedData = (await sanitizeData({
+    sortBy: sorting,
+  })) as unknown as { sortBy: string } | null;
   let ordering: [string, "ASC" | "DESC"] = ["createdAt", "DESC"];
   searchParams.q = p.get("q");
   searchParams.searchBy = p.get("searchBy") as
@@ -25,7 +25,7 @@ export const getBlogsParams = async (req: NextRequest) => {
     | "content"
     | null;
 
-  switch (sentizedData) {
+  switch (sanitizedData?.sortBy) {
     case "create-d-asc":
       ordering = ["createdAt", "ASC"];
       break;
@@ -41,15 +41,20 @@ export const getBlogsParams = async (req: NextRequest) => {
     default:
       ordering = ["createdAt", "ASC"];
   }
+
   return { searchParams, ordering };
 };
 
 export const getPageNumber = async (req: NextRequest) => {
   const p = req.nextUrl.searchParams;
-  const page = parseInt(
-    ((await sanitizeData(p.get("page"))) as unknown as string | null) ?? "1",
-    10
-  );
+  const data = { page: p.get("page") };
+  const sanitized = (await sanitizeData(data)) as unknown as {
+    page: string;
+  } | null;
+
+  const page = parseInt(sanitized?.page ?? "1", 10);
+  console.log("sanitized", sanitized);
+  console.log("page", page);
 
   if (isNaN(page) || page < 1) return 1;
   return page;
@@ -61,54 +66,83 @@ export const getAllBlogsService = async (
   pageNumber: number
 ) => {
   try {
-    // Initialize an empty object to build the search condition
     let whereClause: any = {};
+    let includeClause: any = [
+      {
+        model: User,
+        attributes: ["username"],
+        required: false,
+      },
+      {
+        association: "image",
+        attributes: ["id", "mimeType"],
+        required: false,
+      },
+    ];
 
-    // Check if both search parameters are provided
     if (searchParams.q && searchParams.searchBy) {
-      // Use the value of searchParams.searchBy as the key (e.g., "author", "title", etc.)
-      // Create a search condition for the field with a case-insensitive partial match
-      // Note: Brackets [] are used to dynamically access the object key
-      whereClause[searchParams.searchBy] = {
-        [Op.iLike]: `%${searchParams.q}%`, // `Op.iLike` is used for case-insensitive matching
-      };
-      // Example result if searchParams.q = 'art1' and searchParams.searchBy = 'title':
-      // { title: { [Op.iLike]: '%art1%' } }
-      console.log("we have both search params ", whereClause);
+      if (searchParams.searchBy === "author") {
+        includeClause[0] = {
+          ...includeClause[0],
+          where: {
+            username: {
+              [Op.iLike]: `%${searchParams.q}%`,
+            },
+          },
+          required: true,
+        };
+      } else {
+        whereClause[searchParams.searchBy] = {
+          [Op.iLike]: `%${searchParams.q}%`,
+        };
+      }
     }
 
     const limit = 5;
-    const offset = (pageNumber - 1) * limit; // how many items to skip
+    const offset = (pageNumber - 1) * limit;
+
+    const orderClause: Order = [];
+
+    if (ordering[0] === "username") {
+      orderClause.push([
+        { model: User, as: "author" },
+        "username",
+        ordering[1],
+      ]);
+    } else if (["createdAt", "updatedAt"].includes(ordering[0])) {
+      orderClause.push([ordering[0], ordering[1]]);
+    }
+    console.log("orderClause", orderClause);
     const [totalBlogs, blogs] = await Promise.all([
-      Blog.count({ where: whereClause }),
+      Blog.count({
+        where: whereClause,
+        include: includeClause,
+      }),
       Blog.findAll({
         where: whereClause,
-        include: [
-          { model: User, attributes: ["username"] },
-          {
-            association: "image", // use the alias instead of `model: Upload , otherwise it will return nothing `
-            attributes: ["id", "mimeType"],
-            required: false,
-          },
-        ],
+        include: includeClause,
         limit,
         offset,
-        order: [ordering],
         attributes: { exclude: ["deletedAt", "userId"] },
+        order: orderClause,
       }),
     ]);
+
     const totalPages = Math.ceil(totalBlogs / limit);
-    return { blogs, totalPages };
+    return {
+      blogs: blogs.map((blog) => ({
+        ...blog.get({ plain: true }),
+      })),
+      totalPages,
+    };
   } catch (error) {
-    console.log("error while fetching all blogs", error);
+    console.error("Error while fetching all blogs", error);
     throw error;
   }
 };
 
 export const addBlogService = async (blog: NewBlogProp, userId: number) => {
   try {
-    console.log("Adding blog", blog);
-
     const createdBlog = await Blog.create({
       content: blog.content,
       title: blog.title,
@@ -207,13 +241,15 @@ export const getBlogService = async (blogId: number, userId: number) => {
 
 export const deleteBlogService = async (blogId: number, userId: number) => {
   try {
-    console.log("attempting to delete blog", blogId, userId);
-    await Blog.destroy({
+    const res = await Blog.destroy({
       where: {
         id: blogId,
         userId: userId,
       },
     });
+    if (res === 0) {
+      throw new CustomError("Blog not found", 404);
+    }
   } catch (err) {
     throw err;
   }

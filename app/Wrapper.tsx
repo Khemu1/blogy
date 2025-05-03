@@ -30,7 +30,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
     };
 
     checkUserData();
-  }, [router, setUser]);
+  }, [router]);
 
   useValidateUser();
 

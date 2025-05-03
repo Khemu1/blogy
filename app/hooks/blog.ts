@@ -90,7 +90,6 @@ export const useGetBlog = () => {
       setLoading(false);
     }
   };
-
   return { handleGetBlog, loading, error, data };
 };
 
@@ -189,6 +188,7 @@ export const useDeleteBlog = () => {
         }
         setError(error);
       } else {
+        console.log("error", error);
         setError(new CustomError("An unknown login error occurred", 400));
       }
     } finally {

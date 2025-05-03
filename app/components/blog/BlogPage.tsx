@@ -1,13 +1,10 @@
-"use client";
-
-import { marked } from "marked";
-import DOMPurify from "dompurify";
-import { useEffect, useMemo, useState } from "react";
 import { CommentForm, Comment } from "../../components";
 import { BlogProps, CommentProps } from "@/app/types";
 import { useGetBlogComments } from "@/app/hooks/comment";
 import Image from "next/image";
 import { useToast } from "@/app/store/toast";
+import { marked } from "marked";
+import { useEffect, useMemo, useState } from "react";
 
 interface BlogPageProps {
   blogData: BlogProps;
@@ -16,88 +13,96 @@ interface BlogPageProps {
 
 const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
   const { setToast } = useToast();
-  console.log(blogData);
-  const [allComments, setAllComments] = useState<CommentProps[]>(
-    comments || []
-  );
   const {
     handleGetBlogComments,
     comments: fetchedComments,
     success,
     error: apiCommentsError,
   } = useGetBlogComments();
-  const [sanitizedTitle, setSanitizedTitle] = useState<string>("");
-  const [sanitizedContent, setSanitizedContent] = useState<string>("");
-  const [error, setError] = useState<string | null>(null);
+
+  const [parsedContent, setParsedContent] = useState<string>("");
+  const [parsedTitle, setParsedTitle] = useState<string>("");
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
 
   useEffect(() => {
-    if (!blogData) {
-      setError("Blog data is not available");
+    if (!blogData?.content) {
+      setParsedContent("<p>No content available</p>");
       return;
     }
 
-    const sanitizeMarkdown = async (markdown: string | undefined | null) => {
+    const parseMarkdown = async () => {
+      setIsParsing(true);
       try {
-        if (!markdown) return "";
-        const rawHtml = await marked(markdown);
-        return DOMPurify.sanitize(rawHtml);
-      } catch (err) {
-        console.error("Error processing markdown:", err);
-        return "";
+        const html = await marked(blogData.content);
+        setParsedContent(html);
+        setParseError(null);
+      } catch (error) {
+        console.error("Markdown parsing error:", error);
+        setParseError("Failed to parse blog content");
+        setParsedContent(
+          `<div class="error">Error displaying content. Showing raw text instead.</div><pre>${blogData.content}</pre>`
+        );
+      } finally {
+        setIsParsing(false);
       }
     };
 
-    (async () => {
-      try {
-        const [title, content] = await Promise.all([
-          sanitizeMarkdown(blogData.title),
-          sanitizeMarkdown(blogData.content),
-        ]);
-        setSanitizedTitle(title);
-        setSanitizedContent(content);
-      } catch (err) {
-        console.error("Error processing blog content:", err);
-        setError("Failed to process blog content");
-      }
-    })();
-  }, [blogData]);
-
+    parseMarkdown();
+  }, [blogData?.content]);
   useEffect(() => {
-    if (success && fetchedComments) {
-      setAllComments(fetchedComments);
-    }
-  }, [success, fetchedComments]);
+    const convertMarkdown = async () => {
+      const html = await marked(blogData.title);
+      setParsedTitle(html);
+    };
+    convertMarkdown();
+  }, [blogData?.title]);
+
+  if (!blogData) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-100 rounded-lg">
+        <p>Blog post not found</p>
+      </div>
+    );
+  }
+
+  const createdAt = new Date(blogData.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const updatedAt = new Date(blogData.updatedAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const isUpdated = createdAt !== updatedAt;
+
+  const currentComments = useMemo(
+    () => (success && fetchedComments ? fetchedComments : comments),
+    [success, fetchedComments, comments]
+  );
 
   useEffect(() => {
     if (apiCommentsError) {
-      setToast(apiCommentsError.message, "error");
+      setToast(
+        apiCommentsError.message ?? "An unknown error occurred",
+        "error"
+      );
     }
-  }, [apiCommentsError]);
+    if (parseError) {
+      setToast(parseError, "error");
+    }
+  }, [apiCommentsError, parseError, setToast]);
 
-  const blogContent = useMemo(() => {
-    if (!blogData) return null;
-
-    const createdAt = new Date(blogData.createdAt).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    const updatedAt = new Date(blogData.updatedAt).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    const isUpdated = createdAt !== updatedAt;
-
-    return (
+  return (
+    <main className="container mx-auto px-4 py-8">
       <article className="max-w-7xl mx-auto w-full bg-base-300 rounded-xl shadow-md overflow-hidden p-6 mb-8">
         <header className="mb-8">
           <h1
             className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight"
-            dangerouslySetInnerHTML={{
-              __html: sanitizedTitle || blogData.title || "Untitled Blog",
-            }}
-          />
+            dangerouslySetInnerHTML={{ __html: parsedTitle }}
+          ></h1>
           <div className="flex items-center gap-4 mb-6">
             <div>
               <p className="font-semibold text-gray-700 dark:text-gray-300">
@@ -112,90 +117,62 @@ const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
           {blogData.image?.id && (
             <div className="relative w-full h-64 md:h-96 rounded-lg overflow-hidden mb-6">
               <Image
-                src={
-                  "/assets/blogs/" +
-                  blogData.image.id +
-                  "." +
-                  blogData.image.mimeType.split("/").pop()
-                }
+                src={`/assets/blogs/${
+                  blogData.image.id
+                }.${blogData.image.mimeType.split("/").pop()}`}
                 alt="Blog header image"
                 fill
                 className="object-cover"
                 priority
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           )}
         </header>
 
-        {/* Blog Content */}
-        <div
-          className="prose prose-lg dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{
-            __html:
-              sanitizedContent ||
-              blogData.content ||
-              "<p>No content available</p>",
-          }}
-        />
-      </article>
-    );
-  }, [sanitizedTitle, sanitizedContent, blogData]);
-
-  const blogComments = useMemo(() => {
-    const comments = allComments || [];
-    return (
-      <div className="space-y-6 mt-8">
-        <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
-          {comments.length > 0
-            ? `${comments.length} Comment${comments.length !== 1 ? "s" : ""}`
-            : "No comments yet"}
-        </h2>
-
-        {comments.length > 0 ? (
-          comments.map((comment, index) => (
-            <Comment
-              key={comment.id ?? index}
-              commentData={comment}
-              last={index === comments.length - 1}
-            />
-          ))
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-500 dark:text-gray-400">
-              No comments yet. Be the first to share your thoughts!
-            </p>
+        {isParsing ? (
+          <div className="flex justify-center items-center h-32">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
+        ) : (
+          <div
+            className="prose-lg dark:prose-invert break-words "
+            dangerouslySetInnerHTML={{ __html: parsedContent }}
+          />
         )}
-      </div>
-    );
-  }, [allComments]);
-
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto p-6 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-lg">
-        <p>{error}</p>
-      </div>
-    );
-  }
-
-  if (!blogData) {
-    return (
-      <div className="max-w-4xl mx-auto p-6 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-100 rounded-lg">
-        <p>Loading blog post...</p>
-      </div>
-    );
-  }
-
-  return (
-    <main className="container mx-auto px-4 py-8">
-      {blogContent}
+      </article>
 
       <section className="max-w-7xl mx-auto bg-base-300 rounded-xl shadow-md p-6">
         <CommentForm
           blogId={blogData.id}
           refetchComments={handleGetBlogComments}
         />
-        {blogComments}
+
+        <div className="space-y-6 mt-8">
+          <h2 className="text-2xl font-bold text-white mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
+            {currentComments.length > 0
+              ? `${currentComments.length} Comment${
+                  currentComments.length !== 1 ? "s" : ""
+                }`
+              : "No comments yet"}
+          </h2>
+
+          {currentComments.length > 0 ? (
+            currentComments.map((comment, index) => (
+              <Comment
+                key={comment.id ?? index}
+                commentData={comment}
+                last={index === currentComments.length - 1}
+              />
+            ))
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500 dark:text-gray-400">
+                No comments yet. Be the first to share your thoughts!
+              </p>
+            </div>
+          )}
+        </div>
       </section>
     </main>
   );

@@ -7,7 +7,6 @@ import { validateWithSchema } from "@/app/utils/comment";
 export async function addBlogMiddleware(req: NextRequest, res: NextResponse) {
   try {
     const data: { title: string; content: string } = await req.json();
-    console.log("data blog", data);
     if (!data) {
       throw new CustomError("Invalid Blog Data", 400, "", true);
     }

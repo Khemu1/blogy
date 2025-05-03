@@ -31,10 +31,7 @@ const MyBlogs: FC = () => {
     <div className="p-3 h-full relative">
       <div className="flex flex-col gap-5 overflow-x-hidden z-0 max-h-[800px]">
         {blogsArray.map((blog) => (
-          <MyBlog
-            key={blog.id}
-            blog={blog}
-          />
+          <MyBlog key={blog.id} blog={blog} />
         ))}
       </div>
 
