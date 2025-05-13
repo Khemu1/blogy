@@ -136,7 +136,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ blogData, comments }) => {
           </div>
         ) : (
           <div
-            className="prose-lg dark:prose-invert break-words "
+            className="prose prose-lg dark:prose-invert break-words "
             dangerouslySetInnerHTML={{ __html: parsedContent }}
           />
         )}
